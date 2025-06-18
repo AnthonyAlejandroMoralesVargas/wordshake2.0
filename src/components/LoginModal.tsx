@@ -26,7 +26,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch, onLo
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
               <LogIn size={28} className="text-blue-500" />
-              <h2 className="text-2xl font-bold text-gray-800">Iniciar Sesión</h2>
+              <h2 className="text-2xl font-bold text-gray-800">Log in</h2>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
               <X size={24} className="text-gray-600" />
@@ -34,7 +34,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch, onLo
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-gray-700 mb-1">Email</label>
+              <label className="block text-gray-700 mb-1">Email Address</label>
               <input
                 type="email"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -44,7 +44,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch, onLo
               />
             </div>
             <div>
-              <label className="block text-gray-700 mb-1">Contraseña</label>
+              <label className="block text-gray-700 mb-1">Password</label>
               <input
                 type="password"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -57,7 +57,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch, onLo
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors mt-2"
             >
-              Iniciar Sesión
+              Log in
             </button>
           </form>
           <div className="text-center mt-4">
@@ -66,7 +66,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch, onLo
               onClick={onSwitch}
               className="text-blue-500 hover:underline font-semibold"
             >
-              ¿No tienes cuenta? Regístrate aquí
+              Don't have an account? Register here
             </button>
           </div>
         </div>

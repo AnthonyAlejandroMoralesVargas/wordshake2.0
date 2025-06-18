@@ -29,7 +29,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
               <UserPlus size={28} className="text-green-500" />
-              <h2 className="text-2xl font-bold text-gray-800">Crear Cuenta</h2>
+              <h2 className="text-2xl font-bold text-gray-800">Create Account</h2>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
               <X size={24} className="text-gray-600" />
@@ -38,7 +38,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="block text-gray-700 mb-1">Nombre</label>
+                <label className="block text-gray-700 mb-1">Name</label>
                 <input
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -48,7 +48,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-gray-700 mb-1">Apellido</label>
+                <label className="block text-gray-700 mb-1">Last Name</label>
                 <input
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -59,7 +59,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
               </div>
             </div>
             <div>
-              <label className="block text-gray-700 mb-1">Email</label>
+              <label className="block text-gray-700 mb-1">Email Address</label>
               <input
                 type="email"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -69,7 +69,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
               />
             </div>
             <div>
-              <label className="block text-gray-700 mb-1">Contraseña</label>
+              <label className="block text-gray-700 mb-1">Password</label>
               <input
                 type="password"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -79,7 +79,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
               />
             </div>
             <div>
-              <label className="block text-gray-700 mb-1">Confirmar Contraseña</label>
+              <label className="block text-gray-700 mb-1">Confirm Password</label>
               <input
                 type="password"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -92,7 +92,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
               type="submit"
               className="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors mt-2"
             >
-              Registrarse
+              Register
             </button>
           </form>
           <div className="text-center mt-4">
@@ -101,7 +101,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
               onClick={onSwitch}
               className="text-green-500 hover:underline font-semibold"
             >
-              ¿Ya tienes cuenta? Inicia sesión aquí
+              Already have an account? Login here
             </button>
           </div>
         </div>
