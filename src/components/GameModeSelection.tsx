@@ -1,11 +1,12 @@
+import { Book, Gamepad2, LogIn, Volume2 } from 'lucide-react';
 import React from 'react';
-import { Book, Volume2, Gamepad2 } from 'lucide-react';
 
 interface GameModeSelectionProps {
   onSelectMode: (mode: string) => void;
+  onShowLogin: () => void;
 }
 
-const GameModeSelection: React.FC<GameModeSelectionProps> = ({ onSelectMode }) => {
+const GameModeSelection: React.FC<GameModeSelectionProps> = ({ onSelectMode, onShowLogin }) => {
   const gameModes = [
     {
       id: 'vocabulary',
@@ -34,7 +35,14 @@ const GameModeSelection: React.FC<GameModeSelectionProps> = ({ onSelectMode }) =
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 flex items-center justify-center p-4 relative">
+      <button
+        onClick={onShowLogin}
+        className="absolute top-6 right-8 flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg z-20"
+      >
+        <LogIn size={20} />
+        Iniciar Sesión
+      </button>
       <div className="max-w-4xl w-full">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-white mb-4">English Learning Games</h1>
