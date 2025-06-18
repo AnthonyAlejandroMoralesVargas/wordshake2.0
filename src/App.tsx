@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
 import GameModeSelection from './components/GameModeSelection';
-import WordshakeHome from './components/WordshakeHome';
-import WordshakeGame from './components/WordshakeGame';
 import InstructionsModal from './components/InstructionsModal';
+import LeaderboardModal from './components/LeaderboardModal';
+import LoginModal from './components/LoginModal';
+import RegisterModal from './components/RegisterModal';
+import WordshakeGame from './components/WordshakeGame';
+import WordshakeHome from './components/WordshakeHome';
 
 type AppState = 'mode-selection' | 'wordshake-home' | 'wordshake-game';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<AppState>('mode-selection');
   const [showInstructions, setShowInstructions] = useState<boolean>(false);
+  const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
+  const [showLogin, setShowLogin] = useState<boolean>(true);
+  const [showRegister, setShowRegister] = useState<boolean>(false);
 
   const handleModeSelection = (mode: string) => {
     if (mode === 'vocabulary') {
@@ -33,13 +39,32 @@ function App() {
   };
 
   const handleShowLeaderboard = () => {
-    alert('Leaderboard feature coming soon!');
+    setShowLeaderboard(true);
   };
 
   return (
     <>
+      <LoginModal
+        isOpen={showLogin}
+        onClose={() => setShowLogin(false)}
+        onSwitch={() => {
+          setShowLogin(false);
+          setShowRegister(true);
+        }}
+      />
+      <RegisterModal
+        isOpen={showRegister}
+        onClose={() => setShowRegister(false)}
+        onSwitch={() => {
+          setShowRegister(false);
+          setShowLogin(true);
+        }}
+      />
       {currentScreen === 'mode-selection' && (
-        <GameModeSelection onSelectMode={handleModeSelection} />
+        <GameModeSelection 
+          onSelectMode={handleModeSelection}
+          onShowLogin={() => setShowLogin(true)}
+        />
       )}
 
       {currentScreen === 'wordshake-home' && (
@@ -58,6 +83,12 @@ function App() {
       <InstructionsModal
         isOpen={showInstructions}
         onClose={() => setShowInstructions(false)}
+      />
+
+      <LeaderboardModal
+        isOpen={showLeaderboard}
+        onClose={() => setShowLeaderboard(false)}
+        scores={[]}
       />
     </>
   );
