@@ -223,4 +223,34 @@ export const getExerciseByVideoId = (videoId: string): ListeningExercise | undef
 
 export const getVideosByDifficulty = (difficulty: string): VideoData[] => {
   return listeningVideos.filter(video => video.difficulty === difficulty);
+};
+
+// Validation function to check all exercises
+export const validateExercises = () => {
+  const errors: string[] = [];
+  
+  listeningExercises.forEach(exercise => {
+    const words = exercise.paragraph.split(' ');
+    const blankSpaces = words.filter(word => word === '___').length;
+    const blanksCount = exercise.blanks.length;
+    
+    if (blankSpaces !== blanksCount) {
+      errors.push(`Exercise ${exercise.id}: Found ${blankSpaces} spaces but ${blanksCount} blanks defined`);
+    }
+    
+    // Check if all blanks have required properties
+    exercise.blanks.forEach((blank, index) => {
+      if (!blank.word || !blank.hint) {
+        errors.push(`Exercise ${exercise.id}, Blank ${index + 1}: Missing word or hint`);
+      }
+    });
+  });
+  
+  if (errors.length > 0) {
+    console.error('Exercise validation errors:', errors);
+    return false;
+  }
+  
+  console.log('All exercises are valid!');
+  return true;
 }; 

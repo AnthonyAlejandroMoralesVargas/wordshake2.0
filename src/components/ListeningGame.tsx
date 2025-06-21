@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Play, Pause, RotateCcw, Check, Volume2, HelpCircle, SkipBack, BarChart3, Timer, Lock } from 'lucide-react';
-import { getRandomVideo, getExerciseByVideoId } from '../data/listeningData';
+import { getRandomVideo, getExerciseByVideoId, validateExercises } from '../data/listeningData';
 import { VideoData, ListeningExercise } from '../types';
 import { calculateListeningScore, saveListeningScore } from '../utils/scoreUtils';
 import ConfirmationModal from './ConfirmationModal';
@@ -97,6 +97,8 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
 
   useEffect(() => {
     initializeGame();
+    // Validate all exercises on component mount
+    validateExercises();
   }, [selectedDifficulty]);
 
   useEffect(() => {
@@ -271,11 +273,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
   };
 
   const handleRestartClick = () => {
-    if (gameStarted && !gameEnded) {
-      setShowRestartConfirmation(true);
-    } else {
-      initializeGame();
-    }
+    setShowRestartConfirmation(true);
   };
 
   const handleConfirmHome = () => {
@@ -352,6 +350,22 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
     if (!currentExercise) return null;
 
     const words = currentExercise.paragraph.split(' ');
+    const blankSpaces = words.filter(word => word === '___').length;
+    const blanksCount = currentExercise.blanks.length;
+
+    // Validation: ensure blanks match spaces
+    if (blankSpaces !== blanksCount) {
+      console.error(`Mismatch: ${blankSpaces} spaces found, ${blanksCount} blanks defined`);
+      return (
+        <div className="text-red-600 p-4 border border-red-300 rounded">
+          <strong>Error:</strong> Exercise configuration mismatch. 
+          Found {blankSpaces} spaces but {blanksCount} blanks are defined.
+          <br />
+          <small>Exercise ID: {currentExercise.id}</small>
+        </div>
+      );
+    }
+
     let blankIndex = 0;
 
     return (
