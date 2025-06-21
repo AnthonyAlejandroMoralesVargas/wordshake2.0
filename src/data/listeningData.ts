@@ -98,7 +98,7 @@ export const listeningExercises: ListeningExercise[] = [
   {
     id: '2',
     videoId: '2',
-    paragraph: "Hello! How ___ you today? I'm ___ fine, thank you. Nice to ___ you. What's your ___? My name is John. ___ to meet you too!",
+    paragraph: "Hello! How ___ you today? I'm ___ fine, thank you. Nice to ___ you. What's your ___ ? My name is John. ___ to meet you too!",
     blanks: [
       { id: 1, word: 'are', startTime: 10, endTime: 13, hint: 'Form of "to be"' },
       { id: 2, word: 'doing', startTime: 20, endTime: 23, hint: 'Present continuous verb' },
@@ -112,7 +112,7 @@ export const listeningExercises: ListeningExercise[] = [
   {
     id: '3',
     videoId: '3',
-    paragraph: "This is my ___. Her name is Sarah. She is my ___. My ___ is David. He is my ___. We have a happy ___ together.",
+    paragraph: "This is my ___ . Her name is Sarah. She is my ___ . My ___ is David. He is my ___ . We have a happy ___ together.",
     blanks: [
       { id: 1, word: 'mother', startTime: 12, endTime: 15, hint: 'Female parent' },
       { id: 2, word: 'sister', startTime: 25, endTime: 28, hint: 'Female sibling' },
@@ -140,7 +140,7 @@ export const listeningExercises: ListeningExercise[] = [
   {
     id: '5',
     videoId: '5',
-    paragraph: "I'd like to ___ a table for two, please. What would you ___ to drink? I'll have a glass of ___. And for the main course, I'll ___ the grilled salmon. That sounds ___!",
+    paragraph: "I'd like to ___ a table for two, please. What would you ___ to drink? I'll have a glass of ___ . And for the main course, I'll ___ the grilled salmon. That sounds ___ !",
     blanks: [
       { id: 1, word: 'reserve', startTime: 12, endTime: 15, hint: 'Book in advance' },
       { id: 2, word: 'like', startTime: 25, endTime: 28, hint: 'Want or prefer' },

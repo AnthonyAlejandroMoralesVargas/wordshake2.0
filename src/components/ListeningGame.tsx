@@ -379,12 +379,12 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
             blankIndex++;
 
             return (
-              <span key={index} className="inline-block mx-1 relative">
+              <span key={index} className="inline-block mx-1 relative align-middle">
                 <input
                   type="text"
                   value={userAnswer}
                   onChange={(e) => handleAnswerChange(blank.id, e.target.value)}
-                  className={`w-24 h-8 px-2 border-2 rounded text-center font-medium focus:outline-none transition-all duration-300 ${
+                  className={`w-24 px-2 py-1 border-2 rounded text-center font-medium focus:outline-none transition-all duration-300 ${
                     isHighlighted && selectedDifficulty !== 'advanced'
                       ? 'border-yellow-400 bg-yellow-50 shadow-lg'
                       : 'border-blue-300 focus:border-blue-500'
