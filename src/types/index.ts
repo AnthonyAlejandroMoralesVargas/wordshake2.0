@@ -92,3 +92,43 @@ export interface GameInstructions {
   vocabulary: string[];
   listening: string[];
 }
+
+// Grammar/Speaking Game Types
+export interface GrammarSession {
+  id: string;
+  title: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  category: string;
+  sentences: GrammarSentence[];
+}
+
+export interface GrammarSentence {
+  id: number;
+  text: string;
+  audioUrl?: string;
+  translation?: string;
+  grammarPoint?: string;
+}
+
+export interface GrammarGameState {
+  currentSession: GrammarSession | null;
+  currentSentenceIndex: number;
+  isPlaying: boolean;
+  isRecording: boolean;
+  gameStarted: boolean;
+  gameEnded: boolean;
+  startTime: number;
+  endTime: number;
+  totalTime: number;
+}
+
+export interface GrammarScore {
+  id: string;
+  playerName: string;
+  sessionTitle: string;
+  difficulty: string;
+  totalTime: number;
+  date: string;
+  sentencesCompleted: number;
+  totalSentences: number;
+}

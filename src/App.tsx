@@ -4,8 +4,10 @@ import WordshakeHome from './components/WordshakeHome';
 import WordshakeGame from './components/WordshakeGame';
 import ListeningHome from './components/ListeningHome';
 import ListeningGame from './components/ListeningGame';
+import GrammarHome from './components/GrammarHome';
+import GrammarGame from './components/GrammarGame';
 
-type AppState = 'mode-selection' | 'wordshake-home' | 'wordshake-game' | 'listening-home' | 'listening-game';
+type AppState = 'mode-selection' | 'wordshake-home' | 'wordshake-game' | 'listening-home' | 'listening-game' | 'grammar-home' | 'grammar-game';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<AppState>('mode-selection');
@@ -16,6 +18,8 @@ function App() {
       setCurrentScreen('wordshake-home');
     } else if (mode === 'listening') {
       setCurrentScreen('listening-home');
+    } else if (mode === 'grammar') {
+      setCurrentScreen('grammar-home');
     }
   };
 
@@ -28,6 +32,11 @@ function App() {
     setCurrentScreen('listening-game');
   };
 
+  const handleStartGrammarGame = (difficulty: string) => {
+    setSelectedDifficulty(difficulty);
+    setCurrentScreen('grammar-game');
+  };
+
   const handleBackToModeSelection = () => {
     setCurrentScreen('mode-selection');
   };
@@ -38,6 +47,10 @@ function App() {
 
   const handleBackToListeningHome = () => {
     setCurrentScreen('listening-home');
+  };
+
+  const handleBackToGrammarHome = () => {
+    setCurrentScreen('grammar-home');
   };
 
   const handleShowInstructions = () => {
@@ -80,6 +93,20 @@ function App() {
         <ListeningGame 
           onHome={handleBackToListeningHome} 
           selectedDifficulty={selectedDifficulty}
+        />
+      )}
+
+      {currentScreen === 'grammar-home' && (
+        <GrammarHome
+          onBack={handleBackToModeSelection}
+          onStartGame={handleStartGrammarGame}
+        />
+      )}
+
+      {currentScreen === 'grammar-game' && (
+        <GrammarGame
+          difficulty={selectedDifficulty}
+          onBack={handleBackToGrammarHome}
         />
       )}
     </>

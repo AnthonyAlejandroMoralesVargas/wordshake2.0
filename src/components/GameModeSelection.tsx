@@ -19,10 +19,10 @@ const GameModeSelection: React.FC<GameModeSelectionProps> = ({ onSelectMode, onS
     {
       id: 'grammar',
       name: 'Grammar',
-      description: 'Coming soon...',
+      description: 'Practice pronunciation with speech recognition',
       icon: Gamepad2,
-      available: false,
-      color: 'from-gray-400 to-gray-500'
+      available: true,
+      color: 'from-orange-500 to-red-600'
     },
     {
       id: 'listening',
