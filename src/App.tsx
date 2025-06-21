@@ -1,29 +1,31 @@
 import React, { useState } from 'react';
 import GameModeSelection from './components/GameModeSelection';
-import InstructionsModal from './components/InstructionsModal';
-import LeaderboardModal from './components/LeaderboardModal';
-import LoginModal from './components/LoginModal';
-import RegisterModal from './components/RegisterModal';
-import WordshakeGame from './components/WordshakeGame';
 import WordshakeHome from './components/WordshakeHome';
+import WordshakeGame from './components/WordshakeGame';
+import ListeningHome from './components/ListeningHome';
+import ListeningGame from './components/ListeningGame';
 
-type AppState = 'mode-selection' | 'wordshake-home' | 'wordshake-game';
+type AppState = 'mode-selection' | 'wordshake-home' | 'wordshake-game' | 'listening-home' | 'listening-game';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<AppState>('mode-selection');
-  const [showInstructions, setShowInstructions] = useState<boolean>(false);
-  const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
-  const [showLogin, setShowLogin] = useState<boolean>(true);
-  const [showRegister, setShowRegister] = useState<boolean>(false);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('beginner');
 
   const handleModeSelection = (mode: string) => {
     if (mode === 'vocabulary') {
       setCurrentScreen('wordshake-home');
+    } else if (mode === 'listening') {
+      setCurrentScreen('listening-home');
     }
   };
 
   const handleStartGame = () => {
     setCurrentScreen('wordshake-game');
+  };
+
+  const handleStartListeningGame = (difficulty: string) => {
+    setSelectedDifficulty(difficulty);
+    setCurrentScreen('listening-game');
   };
 
   const handleBackToModeSelection = () => {
@@ -34,37 +36,22 @@ function App() {
     setCurrentScreen('wordshake-home');
   };
 
+  const handleBackToListeningHome = () => {
+    setCurrentScreen('listening-home');
+  };
+
   const handleShowInstructions = () => {
-    setShowInstructions(true);
+    // This is now handled by each individual game
   };
 
   const handleShowLeaderboard = () => {
-    setShowLeaderboard(true);
+    // This is now handled by each individual game
   };
 
   return (
     <>
-      <LoginModal
-        isOpen={showLogin}
-        onClose={() => setShowLogin(false)}
-        onSwitch={() => {
-          setShowLogin(false);
-          setShowRegister(true);
-        }}
-      />
-      <RegisterModal
-        isOpen={showRegister}
-        onClose={() => setShowRegister(false)}
-        onSwitch={() => {
-          setShowRegister(false);
-          setShowLogin(true);
-        }}
-      />
       {currentScreen === 'mode-selection' && (
-        <GameModeSelection 
-          onSelectMode={handleModeSelection}
-          onShowLogin={() => setShowLogin(true)}
-        />
+        <GameModeSelection onSelectMode={handleModeSelection} onShowLogin={() => {}} />
       )}
 
       {currentScreen === 'wordshake-home' && (
@@ -80,16 +67,21 @@ function App() {
         <WordshakeGame onHome={handleBackToWordshakeHome} />
       )}
 
-      <InstructionsModal
-        isOpen={showInstructions}
-        onClose={() => setShowInstructions(false)}
-      />
+      {currentScreen === 'listening-home' && (
+        <ListeningHome
+          onStartGame={handleStartListeningGame}
+          onShowInstructions={handleShowInstructions}
+          onShowLeaderboard={handleShowLeaderboard}
+          onBack={handleBackToModeSelection}
+        />
+      )}
 
-      <LeaderboardModal
-        isOpen={showLeaderboard}
-        onClose={() => setShowLeaderboard(false)}
-        scores={[]}
-      />
+      {currentScreen === 'listening-game' && (
+        <ListeningGame 
+          onHome={handleBackToListeningHome} 
+          selectedDifficulty={selectedDifficulty}
+        />
+      )}
     </>
   );
 }

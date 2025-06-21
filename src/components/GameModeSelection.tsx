@@ -27,10 +27,10 @@ const GameModeSelection: React.FC<GameModeSelectionProps> = ({ onSelectMode, onS
     {
       id: 'listening',
       name: 'Listening',
-      description: 'Coming soon...',
+      description: 'Fill in the blanks while watching videos',
       icon: Volume2,
-      available: false,
-      color: 'from-gray-400 to-gray-500'
+      available: true,
+      color: 'from-green-500 to-teal-600'
     }
   ];
 
