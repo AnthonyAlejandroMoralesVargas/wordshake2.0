@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { AuthService, LoginRequest, RegisterRequest } from '../services/authService';
 
 interface User {
   id: string;
@@ -15,6 +16,7 @@ interface AuthContextType {
   register: (firstName: string, lastName: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   getCurrentUser: () => User | null;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,67 +36,100 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Load user from localStorage on app start
   useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
+    const initializeAuth = async () => {
       try {
-        const userData = JSON.parse(savedUser);
-        setUser(userData);
-        setIsLoggedIn(true);
+        const token = AuthService.getStoredToken();
+        if (token) {
+          // Verificar si el token es válido intentando obtener datos del usuario
+          const savedUser = localStorage.getItem('currentUser');
+          if (savedUser) {
+            try {
+              const userData = JSON.parse(savedUser);
+              setUser(userData);
+              setIsLoggedIn(true);
+            } catch (error) {
+              console.error('Error loading user from localStorage:', error);
+              localStorage.removeItem('currentUser');
+              localStorage.removeItem('authToken');
+            }
+          }
+        }
       } catch (error) {
-        console.error('Error loading user from localStorage:', error);
+        console.error('Error initializing auth:', error);
+        // Limpiar datos corruptos
         localStorage.removeItem('currentUser');
+        localStorage.removeItem('authToken');
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulate login - in a real app, this would be an API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // For demo purposes, create a user with the email
-        const userData: User = {
-          id: Date.now().toString(),
-          firstName: email.split('@')[0],
-          lastName: 'User',
-          email: email,
-          displayName: email.split('@')[0]
-        };
+    try {
+      setLoading(true);
+      const loginData: LoginRequest = { email, password };
+      const response = await AuthService.login(loginData);
 
-        setUser(userData);
-        setIsLoggedIn(true);
-        localStorage.setItem('currentUser', JSON.stringify(userData));
-        resolve(true);
-      }, 1000);
-    });
+      // Crear objeto de usuario compatible con la interfaz existente
+      const userData: User = {
+        id: email, // Usar email como ID
+        firstName: response.player.name,
+        lastName: response.player.lastname,
+        email: response.player.email,
+        displayName: `${response.player.name} ${response.player.lastname}`
+      };
+
+      setUser(userData);
+      setIsLoggedIn(true);
+      localStorage.setItem('currentUser', JSON.stringify(userData));
+      return true;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const register = async (firstName: string, lastName: string, email: string, password: string): Promise<boolean> => {
-    // Simulate registration - in a real app, this would be an API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const userData: User = {
-          id: Date.now().toString(),
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
-          displayName: `${firstName} ${lastName}`
-        };
+    try {
+      setLoading(true);
+      const registerData: RegisterRequest = {
+        email,
+        name: firstName,
+        last_name: lastName,
+        password
+      };
 
-        setUser(userData);
-        setIsLoggedIn(true);
-        localStorage.setItem('currentUser', JSON.stringify(userData));
-        resolve(true);
-      }, 1000);
-    });
+      await AuthService.register(registerData);
+
+      // Después del registro exitoso, hacer login automáticamente
+      return await login(email, password);
+    } catch (error) {
+      console.error('Registration failed:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsLoggedIn(false);
-    localStorage.removeItem('currentUser');
+  const logout = async () => {
+    try {
+      await AuthService.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setIsLoggedIn(false);
+      localStorage.removeItem('currentUser');
+    }
   };
 
   const getCurrentUser = (): User | null => {
@@ -107,7 +142,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
-    getCurrentUser
+    getCurrentUser,
+    loading
   };
 
   return (
