@@ -1,4 +1,4 @@
-import { LogIn, X, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, LogIn, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -32,10 +32,23 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch }) =>
         // Close modal
         onClose();
       } else {
-        setError('Login failed. Please try again.');
+        setError('Invalid email or password. Please try again.');
       }
-    } catch (err) {
-      setError('An error occurred during login.');
+    } catch (err: any) {
+      // Manejar diferentes tipos de errores de la API
+      if (err.message) {
+        if (err.message.includes('404')) {
+          setError('User not found. Please check your email or register.');
+        } else if (err.message.includes('401')) {
+          setError('Invalid credentials. Please check your password.');
+        } else if (err.message.includes('Network')) {
+          setError('Connection error. Please check your internet connection.');
+        } else {
+          setError(err.message || 'An error occurred during login.');
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -70,6 +83,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch }) =>
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
+                disabled={isSubmitting}
               />
             </div>
             
@@ -78,15 +92,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch }) =>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 disabled:bg-gray-50"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
+                  disabled={isSubmitting}
                 />
                 <button
                   type="button"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={isSubmitting}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -104,7 +120,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch }) =>
             <button
               type="button"
               onClick={onSwitch}
-              className="text-blue-500 hover:underline font-semibold"
+              className="text-blue-500 hover:underline font-semibold disabled:cursor-not-allowed"
+              disabled={isSubmitting}
             >
               Don't have an account? Register here
             </button>

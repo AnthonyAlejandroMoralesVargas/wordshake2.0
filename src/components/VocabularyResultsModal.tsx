@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Trophy, RotateCcw, Home, User, Star, Clock, Book, X } from 'lucide-react';
+import { Book, Clock, Home, RotateCcw, Star, Trophy, User, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { saveVocabularyScore } from '../utils/scoreUtils';
+import { useScoreService } from '../hooks/useScoreService';
 
 interface VocabularyResultsModalProps {
   isOpen: boolean;
@@ -35,15 +35,16 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
   autoSaved = false
 }) => {
   const { user, isLoggedIn } = useAuth();
+  const { saveVocabularyScore, loading, error } = useScoreService();
   const [scoreSaved, setScoreSaved] = useState(false);
   const [showSaveFeedback, setShowSaveFeedback] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      // Auto-save score when modal opens
+    if (isOpen && isLoggedIn && user) {
+      // Auto-save score when modal opens and user is logged in
       handleAutoSave();
     }
-  }, [isOpen]);
+  }, [isOpen, isLoggedIn, user]);
 
   const getScoreMessage = (score: number) => {
     if (score >= 50) return "Outstanding! You're a vocabulary master!";
@@ -71,34 +72,36 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
     }
   };
 
-  const handleAutoSave = () => {
-    const playerName = isLoggedIn && user ? user.displayName : 'Anonymous Player';
-    
-    const scoreData = {
-      playerName: playerName,
-      score: score,
-      stars: stars,
-      wordsFound: wordsFound.length,
-      theme: theme,
-      difficulty: difficulty,
-      timeSpent: timeSpent
-    };
+  const handleAutoSave = async () => {
+    if (!isLoggedIn || !user) {
+      console.log('User not logged in, skipping score save');
+      return;
+    }
 
-    console.log('Saving score:', scoreData);
+    console.log('Saving vocabulary score to API...');
 
     try {
-      const savedScore = saveVocabularyScore(scoreData);
-      console.log('Score saved successfully:', savedScore);
-      
-      setScoreSaved(true);
-      setShowSaveFeedback(true);
+      const success = await saveVocabularyScore(
+        wordsFound.length,
+        difficulty,
+        score,
+        timeSpent / 1000 // Convert to seconds
+      );
 
-      // Hide save feedback after 3 seconds
-      setTimeout(() => {
-        setShowSaveFeedback(false);
-      }, 3000);
+      if (success) {
+        console.log('Score saved successfully to API');
+        setScoreSaved(true);
+        setShowSaveFeedback(true);
+
+        // Hide save feedback after 3 seconds
+        setTimeout(() => {
+          setShowSaveFeedback(false);
+        }, 3000);
+      } else {
+        console.error('Failed to save score to API');
+      }
     } catch (error) {
-      console.error('Error saving score:', error);
+      console.error('Error saving score to API:', error);
     }
   };
 
@@ -141,6 +144,35 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
             <div className="text-lg text-gray-600 mb-4">Total Points</div>
             <p className="text-lg font-semibold text-blue-600">{getScoreMessage(score)}</p>
           </div>
+
+          {/* Save Status */}
+          {isLoggedIn && (
+            <div className="mb-4">
+              {loading && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-blue-600 text-sm">Saving your score...</p>
+                </div>
+              )}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-red-600 text-sm">Error saving score: {error}</p>
+                </div>
+              )}
+              {scoreSaved && showSaveFeedback && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <p className="text-green-600 text-sm">Score saved successfully!</p>
+                </div>
+              )}
+              {!isLoggedIn && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <p className="text-yellow-600 text-sm">
+                    <User size={16} className="inline mr-1" />
+                    Login to save your scores and compete on leaderboards!
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-4 mb-6">
@@ -200,16 +232,16 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
             </div>
           </div>
 
-          {/* Found Words */}
+          {/* Words Found */}
           {wordsFound.length > 0 && (
             <div className="mb-6">
-              <h3 className="font-semibold text-gray-800 mb-3">Words You Found</h3>
-              <div className="bg-white border rounded-lg p-4 max-h-32 overflow-y-auto">
+              <h3 className="font-semibold text-gray-800 mb-3">Words Found</h3>
+              <div className="bg-white border border-gray-200 rounded-lg p-4 max-h-32 overflow-y-auto">
                 <div className="flex flex-wrap gap-2">
                   {wordsFound.map((word, index) => (
                     <span
                       key={index}
-                      className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium"
+                      className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium"
                     >
                       {word}
                     </span>
@@ -219,50 +251,31 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
             </div>
           )}
 
-          {/* Auto Save Feedback */}
-          {showSaveFeedback && (
-            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-green-800">
-                <Trophy size={20} />
-                <span className="font-semibold">Score automatically saved!</span>
-              </div>
-              <p className="text-green-700 text-sm mt-1">
-                Your score has been saved to the leaderboard.
-              </p>
-            </div>
-          )}
-
-          {/* Main Action Buttons */}
-          <div className="bg-blue-50 rounded-lg p-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">What would you like to do next?</h3>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={onRestart}
-                className="flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors text-lg"
-              >
-                <RotateCcw size={20} />
-                Start New Game
-              </button>
-              <button
-                onClick={onHome}
-                className="flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors text-lg"
-              >
-                <Home size={20} />
-                Back to Menu
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="bg-gray-50 px-6 py-4 border-t">
-          <div className="flex justify-center">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={onRestart}
+              disabled={loading}
+              className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+            >
+              <RotateCcw size={20} />
+              Play Again
+            </button>
             <button
               onClick={onLeaderboard}
-              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+              disabled={loading}
+              className="flex-1 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
             >
-              <Trophy size={16} />
-              View Leaderboard
+              <Trophy size={20} />
+              Leaderboard
+            </button>
+            <button
+              onClick={onHome}
+              disabled={loading}
+              className="flex-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+            >
+              <Home size={20} />
+              Home
             </button>
           </div>
         </div>
