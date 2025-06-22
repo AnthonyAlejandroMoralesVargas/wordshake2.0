@@ -6,12 +6,16 @@ import ListeningHome from './components/ListeningHome';
 import ListeningGame from './components/ListeningGame';
 import GrammarHome from './components/GrammarHome';
 import GrammarGame from './components/GrammarGame';
+import LoginModal from './components/LoginModal';
+import RegisterModal from './components/RegisterModal';
 
 type AppState = 'mode-selection' | 'wordshake-home' | 'wordshake-game' | 'listening-home' | 'listening-game' | 'grammar-home' | 'grammar-game';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<AppState>('mode-selection');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('beginner');
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   const handleModeSelection = (mode: string) => {
     if (mode === 'vocabulary') {
@@ -21,6 +25,28 @@ function App() {
     } else if (mode === 'grammar') {
       setCurrentScreen('grammar-home');
     }
+  };
+
+  const handleShowLogin = () => {
+    setShowLoginModal(true);
+  };
+
+  const handleCloseLogin = () => {
+    setShowLoginModal(false);
+  };
+
+  const handleSwitchToRegister = () => {
+    setShowLoginModal(false);
+    setShowRegisterModal(true);
+  };
+
+  const handleCloseRegister = () => {
+    setShowRegisterModal(false);
+  };
+
+  const handleSwitchToLogin = () => {
+    setShowRegisterModal(false);
+    setShowLoginModal(true);
   };
 
   const handleStartGame = () => {
@@ -64,7 +90,7 @@ function App() {
   return (
     <>
       {currentScreen === 'mode-selection' && (
-        <GameModeSelection onSelectMode={handleModeSelection} onShowLogin={() => {}} />
+        <GameModeSelection onSelectMode={handleModeSelection} onShowLogin={handleShowLogin} />
       )}
 
       {currentScreen === 'wordshake-home' && (
@@ -109,6 +135,18 @@ function App() {
           onBack={handleBackToGrammarHome}
         />
       )}
+
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={handleCloseLogin}
+        onSwitch={handleSwitchToRegister}
+      />
+
+      <RegisterModal
+        isOpen={showRegisterModal}
+        onClose={handleCloseRegister}
+        onSwitch={handleSwitchToLogin}
+      />
     </>
   );
 }

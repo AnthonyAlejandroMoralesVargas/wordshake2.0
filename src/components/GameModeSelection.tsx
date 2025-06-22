@@ -41,7 +41,7 @@ const GameModeSelection: React.FC<GameModeSelectionProps> = ({ onSelectMode, onS
         className="absolute top-6 right-8 flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg z-20"
       >
         <LogIn size={20} />
-        Iniciar Sesión
+        Log In
       </button>
       <div className="max-w-4xl w-full">
         <div className="text-center mb-12">
