@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getRandomTheme } from '../data/themes';
-import { generateOptimalLetterMatrix, shuffleArray, isValidWord, calculateStars, validateGridCanFormAllWords, testOptimalGridAlgorithm } from '../utils/gameUtils';
+import { generateOptimalLetterMatrix, shuffleArray, isValidWord, calculateStars, validateGridCanFormAllWords, testOptimalGridAlgorithm, canFormWord } from '../utils/gameUtils';
 import { useGameTimer } from '../hooks/useGameTimer';
 import GameHeader from './GameHeader';
 import LetterGrid from './LetterGrid';
@@ -37,6 +37,11 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showError, setShowError] = useState<boolean>(false);
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [hintIndices, setHintIndices] = useState<number[]>([]);
+  const [hintsUsed, setHintsUsed] = useState<number>(0);
+  const [showHint, setShowHint] = useState<boolean>(false);
+  const [currentHintIndex, setCurrentHintIndex] = useState<number>(0);
+  const [hintAnimationInterval, setHintAnimationInterval] = useState<NodeJS.Timeout | null>(null);
 
   // Get time limit based on difficulty
   const timeLimit = getTimeLimitForDifficulty(difficulty);
@@ -58,8 +63,11 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
       if (errorTimeoutRef.current) {
         clearTimeout(errorTimeoutRef.current);
       }
+      if (hintAnimationInterval) {
+        clearInterval(hintAnimationInterval);
+      }
     };
-  }, []);
+  }, [hintAnimationInterval]);
 
   // Test the algorithm on mount
   useEffect(() => {
@@ -115,6 +123,11 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
     startTimer();
     setErrorMessage('');
     setShowError(false);
+    setHintIndices([]);
+    setHintsUsed(0);
+    setShowHint(false);
+    setCurrentHintIndex(0);
+    setHintAnimationInterval(null);
   };
 
   const handleLetterClick = (index: number) => {
@@ -183,6 +196,11 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
     setSelectedIndices([]);
   };
 
+  const handleHintClick = () => {
+    console.log('Hint button clicked');
+    showHintWord();
+  };
+
   const handleHomeClick = () => {
     if (gameStarted && timeRemaining > 0) {
       setShowHomeConfirmation(true);
@@ -242,6 +260,120 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
     }, 1000);
   };
 
+  // Function to find available words that haven't been found yet
+  const getAvailableWords = (): string[] => {
+    return currentTheme.words.filter(word => !foundWords.includes(word));
+  };
+
+  // Function to find a word that can be formed with available letters
+  const findFormableWord = (): string | null => {
+    const availableWords = getAvailableWords();
+    const availableLetters = letters;
+    
+    // Shuffle the available words to get random hints
+    const shuffledWords = shuffleArray([...availableWords]);
+    
+    for (const word of shuffledWords) {
+      if (canFormWord(word, availableLetters)) {
+        console.log(`Hint showing word: ${word}`);
+        return word;
+      }
+    }
+    return null;
+  };
+
+  // Function to get letter indices for a word
+  const getLetterIndicesForWord = (word: string): number[] => {
+    const indices: number[] = [];
+    const usedIndices = new Set<number>();
+    
+    // First pass: try to find exact matches
+    for (const letter of word) {
+      let found = false;
+      for (let i = 0; i < letters.length; i++) {
+        if (letters[i] === letter && !usedIndices.has(i)) {
+          indices.push(i);
+          usedIndices.add(i);
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        console.warn(`Could not find letter ${letter} for word ${word}`);
+        return [];
+      }
+    }
+    
+    return indices;
+  };
+
+  // Function to show hint
+  const showHintWord = () => {
+    console.log('showHintWord called');
+    
+    // Check if hints are available for this difficulty
+    if (difficulty === 'advanced') {
+      console.log('No hints in advanced mode');
+      return;
+    }
+    
+    // Check hint limit for intermediate
+    if (difficulty === 'intermediate' && hintsUsed >= 5) {
+      console.log('Hint limit reached');
+      return;
+    }
+    
+    const formableWord = findFormableWord();
+    console.log('Formable word found:', formableWord);
+    
+    if (formableWord) {
+      const wordIndices = getLetterIndicesForWord(formableWord);
+      console.log('Word indices:', wordIndices);
+      
+      if (wordIndices.length > 0) {
+        setHintIndices(wordIndices);
+        setShowHint(true);
+        setHintsUsed(prev => prev + 1);
+        setCurrentHintIndex(0);
+        
+        // Clear any existing interval
+        if (hintAnimationInterval) {
+          clearInterval(hintAnimationInterval);
+        }
+        
+        // Start sequential animation
+        const interval = setInterval(() => {
+          setCurrentHintIndex(prev => {
+            if (prev >= wordIndices.length - 1) {
+              // Finished the word, wait 2 seconds then restart
+              setTimeout(() => {
+                setCurrentHintIndex(0);
+              }, 2000);
+              return prev;
+            } else {
+              return prev + 1;
+            }
+          });
+        }, 500); // 500ms between each letter
+        
+        setHintAnimationInterval(interval);
+        
+        // Stop the animation after 10 seconds total
+        setTimeout(() => {
+          if (hintAnimationInterval) {
+            clearInterval(hintAnimationInterval);
+          }
+          setShowHint(false);
+          setHintIndices([]);
+          setCurrentHintIndex(0);
+          setHintAnimationInterval(null);
+        }, 10000);
+      }
+    } else {
+      console.log('No formable word found');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 p-4">
       <div className="max-w-6xl mx-auto">
@@ -289,6 +421,29 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
                 Shuffles remaining: {shufflesRemaining}
               </div>
             )}
+            {difficulty === 'intermediate' && (
+              <div className="mt-2 text-sm text-gray-600">
+                Hints used: {hintsUsed}/5
+              </div>
+            )}
+            {difficulty === 'beginner' && (
+              <div className="mt-2 text-sm text-gray-600">
+                Hints used: {hintsUsed} (unlimited)
+              </div>
+            )}
+            {/* Debug button - remove in production */}
+            {(difficulty === 'beginner' || difficulty === 'intermediate') && (
+              <button
+                onClick={handleHintClick}
+                disabled={
+                  (difficulty === 'intermediate' && hintsUsed >= 5) ||
+                  foundWords.length >= currentTheme.words.length
+                }
+                className="mt-2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {difficulty === 'beginner' ? 'Hint (Unlimited)' : `Hint (${5 - hintsUsed} left)`}
+              </button>
+            )}
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6">
@@ -301,6 +456,9 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
                   selectedIndices={selectedIndices}
                   onLetterClick={handleLetterClick}
                   disabled={timeRemaining === 0}
+                  hintIndices={hintIndices}
+                  showHint={showHint}
+                  currentHintIndex={currentHintIndex}
                 />
               </div>
             </div>
