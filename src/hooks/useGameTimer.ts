@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 export const useGameTimer = (initialTime: number = 180) => {
   const [timeRemaining, setTimeRemaining] = useState(initialTime);
   const [isRunning, setIsRunning] = useState(false);
+  const [formattedTime, setFormattedTime] = useState('');
   const intervalRef = useRef<number | null>(null);
 
   const startTimer = () => {
@@ -56,11 +57,27 @@ export const useGameTimer = (initialTime: number = 180) => {
     };
   }, [isRunning]);
 
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  // Update formatted time whenever timeRemaining changes
+  useEffect(() => {
+    const formatTime = (seconds: number): string => {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+    
+    setFormattedTime(formatTime(timeRemaining));
+  }, [timeRemaining]);
+
+  // Initialize formatted time on mount
+  useEffect(() => {
+    const formatTime = (seconds: number): string => {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+    
+    setFormattedTime(formatTime(initialTime));
+  }, [initialTime]);
 
   return {
     timeRemaining,
@@ -68,6 +85,6 @@ export const useGameTimer = (initialTime: number = 180) => {
     startTimer,
     stopTimer,
     resetTimer,
-    formatTime: formatTime(timeRemaining)
+    formatTime: formattedTime
   };
 };

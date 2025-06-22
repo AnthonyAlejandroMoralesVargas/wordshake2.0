@@ -7,6 +7,7 @@ interface WordDisplayWithActionsProps {
   onValidate: () => void;
   onClear: () => void;
   canValidate: boolean;
+  canShuffle?: boolean;
   disabled?: boolean;
 }
 
@@ -16,6 +17,7 @@ const WordDisplayWithActions: React.FC<WordDisplayWithActionsProps> = ({
   onValidate,
   onClear,
   canValidate,
+  canShuffle = true,
   disabled = false
 }) => {
   return (
@@ -23,7 +25,7 @@ const WordDisplayWithActions: React.FC<WordDisplayWithActionsProps> = ({
       <div className="flex items-center justify-between gap-4">
         <button
           onClick={onShuffle}
-          disabled={disabled}
+          disabled={disabled || !canShuffle}
           className="p-3 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-400 text-white rounded-lg transition-colors flex-shrink-0"
           title="Shuffle letters"
         >

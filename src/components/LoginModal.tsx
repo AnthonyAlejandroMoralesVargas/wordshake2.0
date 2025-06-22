@@ -1,36 +1,44 @@
 import { LogIn, X, Eye, EyeOff } from 'lucide-react';
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSwitch: () => void;
-  onLogin?: (email: string, password: string) => void;
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch, onLogin }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch }) => {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError('');
 
-    // Simulate successful login (allows any user as requested)
-    setTimeout(() => {
+    try {
+      const success = await login(email, password);
+      if (success) {
+        // Clear form
+        setEmail('');
+        setPassword('');
+        // Close modal
+        onClose();
+      } else {
+        setError('Login failed. Please try again.');
+      }
+    } catch (err) {
+      setError('An error occurred during login.');
+    } finally {
       setIsSubmitting(false);
-      // Clear form
-      setEmail('');
-      setPassword('');
-      // Close modal
-      onClose();
-      // Here you could redirect the user or change the application state
-      console.log('Login successful:', { email, password });
-    }, 1000);
+    }
   };
 
   return (
@@ -46,6 +54,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch, onLo
               <X size={24} className="text-gray-600" />
             </button>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-gray-700 mb-1">Email Address</label>
@@ -57,6 +72,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch, onLo
                 required
               />
             </div>
+            
             <div>
               <label className="block text-gray-700 mb-1">Password</label>
               <div className="relative">

@@ -1,15 +1,16 @@
 import { UserPlus, X, Eye, EyeOff } from 'lucide-react';
 import React, { useState } from 'react';
 import { validateRegistration } from '../utils/authUtils';
+import { useAuth } from '../contexts/AuthContext';
 
 interface RegisterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSwitch: () => void;
-  onRegister?: (firstName: string, lastName: string, email: string, password: string, confirmPassword: string) => void;
 }
 
-const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch, onRegister }) => {
+const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch }) => {
+  const { register } = useAuth();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -22,7 +23,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrors([]);
@@ -35,20 +36,27 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
       return;
     }
 
-    // Simulate successful registration
-    setTimeout(() => {
+    try {
+      const success = await register(firstName, lastName, email, password);
+      if (success) {
+        // Clear form
+        setFirstName('');
+        setLastName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setErrors([]);
+        // Close modal and switch to login
+        onClose();
+        onSwitch();
+      } else {
+        setErrors(['Registration failed. Please try again.']);
+      }
+    } catch (err) {
+      setErrors(['An error occurred during registration.']);
+    } finally {
       setIsSubmitting(false);
-      // Clear form
-      setFirstName('');
-      setLastName('');
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setErrors([]);
-      // Close modal and switch to login
-      onClose();
-      onSwitch();
-    }, 1000);
+    }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {

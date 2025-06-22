@@ -8,14 +8,16 @@ import GrammarHome from './components/GrammarHome';
 import GrammarGame from './components/GrammarGame';
 import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 type AppState = 'mode-selection' | 'wordshake-home' | 'wordshake-game' | 'listening-home' | 'listening-game' | 'grammar-home' | 'grammar-game';
 
-function App() {
+function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<AppState>('mode-selection');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('beginner');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const { user, isLoggedIn, logout } = useAuth();
 
   const handleModeSelection = (mode: string) => {
     if (mode === 'vocabulary') {
@@ -50,6 +52,11 @@ function App() {
   };
 
   const handleStartGame = () => {
+    setCurrentScreen('wordshake-game');
+  };
+
+  const handleStartVocabularyGame = (difficulty: string) => {
+    setSelectedDifficulty(difficulty);
     setCurrentScreen('wordshake-game');
   };
 
@@ -90,20 +97,29 @@ function App() {
   return (
     <>
       {currentScreen === 'mode-selection' && (
-        <GameModeSelection onSelectMode={handleModeSelection} onShowLogin={handleShowLogin} />
+        <GameModeSelection 
+          onSelectMode={handleModeSelection} 
+          onShowLogin={handleShowLogin}
+          user={user}
+          isLoggedIn={isLoggedIn}
+          onLogout={logout}
+        />
       )}
 
       {currentScreen === 'wordshake-home' && (
         <WordshakeHome
-          onStartGame={handleStartGame}
+          onStartGame={handleStartVocabularyGame}
           onShowInstructions={handleShowInstructions}
-          onShowLeaderboard={handleShowLeaderboard}
+          onShowLeaderboard={handleShowInstructions}
           onBack={handleBackToModeSelection}
         />
       )}
 
       {currentScreen === 'wordshake-game' && (
-        <WordshakeGame onHome={handleBackToWordshakeHome} />
+        <WordshakeGame
+          difficulty={selectedDifficulty}
+          onHome={handleBackToWordshakeHome}
+        />
       )}
 
       {currentScreen === 'listening-home' && (
@@ -148,6 +164,14 @@ function App() {
         onSwitch={handleSwitchToLogin}
       />
     </>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

@@ -2,11 +2,15 @@ import { GameInstructions } from '../types';
 
 export const gameInstructions: GameInstructions = {
   vocabulary: [
+    "Choose your difficulty level before starting:",
+    "  • Basic: 3-minute time limit, simple themes, unlimited shuffles",
+    "  • Intermediate: 2.5-minute time limit, mixed themes, 5 shuffles maximum",
+    "  • Advanced: 2-minute time limit, complex themes, no shuffles allowed",
     "Select letters from the 4x4 grid to form words",
     "Words must be at least 3 letters long",
     "All words must be related to the current theme",
     "Use the 'Validate' button to check your word",
-    "Use the 'Shuffle' button to rearrange letters",
+    "Use the 'Shuffle' button to rearrange letters (if available for your level)",
     "Use the 'Clear' button to start over",
     "Earn stars based on word length:",
     "  • 3 letters = 1 star",
@@ -37,8 +41,6 @@ export const gameInstructions: GameInstructions = {
     "  • Speed bonus: Up to 10 points (only if 50%+ correct)",
     "  • Hint penalty: -5 points per hint (max -20 points)",
     "  • Perfect score: 100 points",
-    "  • All wrong answers: 0 points",
-    "Focus on pronunciation and context clues",
-    "Manage your time, video plays, and hints wisely!"
+    "Try to achieve the highest accuracy possible!"
   ]
 }; 

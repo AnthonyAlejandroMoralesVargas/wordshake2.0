@@ -1,6 +1,7 @@
 export interface Theme {
   id: string;
   name: string;
+  difficulty: string;
   color: string;
   words: string[];
 }
@@ -84,6 +85,7 @@ export interface VocabularyScore {
   stars: number;
   wordsFound: number;
   theme: string;
+  difficulty: string;
   date: string;
   timeSpent: number;
 }

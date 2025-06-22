@@ -42,9 +42,43 @@ const VocabularyInstructionsModal: React.FC<VocabularyInstructionsModalProps> = 
             <div className="bg-blue-50 rounded-lg p-4">
               <h3 className="text-lg font-semibold text-blue-800 mb-2">Game Overview</h3>
               <p className="text-blue-700">
-                Build words from a 4x4 letter grid based on different themes. Find as many words as possible 
-                before time runs out and earn stars based on word length.
+                Build words from a 4x4 letter grid based on different themes. Choose your difficulty level 
+                and find as many words as possible before time runs out. Earn stars based on word length.
               </p>
+            </div>
+
+            {/* Difficulty Levels */}
+            <div className="bg-purple-50 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-purple-800 mb-3">Difficulty Levels</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-green-600 text-sm font-bold">B</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-purple-800">Basic</h4>
+                    <p className="text-sm text-purple-700">3-minute time limit, simple themes, unlimited shuffles</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-blue-600 text-sm font-bold">I</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-purple-800">Intermediate</h4>
+                    <p className="text-sm text-purple-700">2.5-minute time limit, mixed themes, 5 shuffles maximum</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-red-600 text-sm font-bold">A</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-purple-800">Advanced</h4>
+                    <p className="text-sm text-purple-700">2-minute time limit, complex themes, no shuffles allowed</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* How to Play */}
@@ -144,16 +178,16 @@ const VocabularyInstructionsModal: React.FC<VocabularyInstructionsModalProps> = 
               <h3 className="text-lg font-semibold text-green-800 mb-3">Available Themes</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="bg-orange-100 rounded-lg p-3 text-center">
-                  <h4 className="font-semibold text-orange-800">Fruits</h4>
-                  <p className="text-sm text-orange-700">Apple, Banana, Orange...</p>
+                  <h4 className="font-semibold text-orange-800">Basic Themes</h4>
+                  <p className="text-sm text-orange-700">Fruits, Animals, Colors</p>
                 </div>
                 <div className="bg-blue-100 rounded-lg p-3 text-center">
-                  <h4 className="font-semibold text-blue-800">Animals</h4>
-                  <p className="text-sm text-blue-700">Cat, Dog, Lion, Tiger...</p>
+                  <h4 className="font-semibold text-blue-800">Intermediate Themes</h4>
+                  <p className="text-sm text-blue-700">Transport, Food, Jobs</p>
                 </div>
                 <div className="bg-purple-100 rounded-lg p-3 text-center">
-                  <h4 className="font-semibold text-purple-800">Transport</h4>
-                  <p className="text-sm text-purple-700">Car, Bus, Train, Plane...</p>
+                  <h4 className="font-semibold text-purple-800">Advanced Themes</h4>
+                  <p className="text-sm text-purple-700">Technology, Science, Business</p>
                 </div>
               </div>
             </div>

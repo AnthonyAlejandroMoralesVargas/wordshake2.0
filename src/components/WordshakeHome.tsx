@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Play, BookOpen, Trophy, Book } from 'lucide-react';
 import VocabularyInstructionsModal from './VocabularyInstructionsModal';
+import VocabularyDifficultyModal from './VocabularyDifficultyModal';
+import VocabularyLeaderboardModal from './VocabularyLeaderboardModal';
 
 interface WordshakeHomeProps {
-  onStartGame: () => void;
+  onStartGame: (difficulty: string) => void;
   onShowInstructions: () => void;
   onShowLeaderboard: () => void;
   onBack: () => void;
@@ -16,9 +18,24 @@ const WordshakeHome: React.FC<WordshakeHomeProps> = ({
   onBack
 }) => {
   const [showInstructions, setShowInstructions] = useState<boolean>(false);
+  const [showDifficultySelection, setShowDifficultySelection] = useState<boolean>(false);
+  const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
 
   const handleShowInstructions = () => {
     setShowInstructions(true);
+  };
+
+  const handleShowLeaderboard = () => {
+    setShowLeaderboard(true);
+  };
+
+  const handleStartGame = () => {
+    setShowDifficultySelection(true);
+  };
+
+  const handleSelectDifficulty = (difficulty: string) => {
+    setShowDifficultySelection(false);
+    onStartGame(difficulty);
   };
 
   return (
@@ -44,7 +61,7 @@ const WordshakeHome: React.FC<WordshakeHomeProps> = ({
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-gray-800 mb-4">Vocabulary Challenge</h1>
             <p className="text-xl text-gray-600 mb-8">
-              Build words from letter grids and expand your vocabulary
+              Build words from letter grids based on different themes
             </p>
             
             <div className="bg-white rounded-2xl p-8 shadow-lg max-w-2xl mx-auto">
@@ -64,22 +81,26 @@ const WordshakeHome: React.FC<WordshakeHomeProps> = ({
                   <p className="text-sm text-gray-600">Score based on word length</p>
                 </div>
                 <div className="text-center">
-                  <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <BookOpen size={32} className="text-orange-600" />
+                  <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Play size={32} className="text-green-600" />
                   </div>
-                  <h3 className="font-semibold text-gray-800">Learn Themes</h3>
-                  <p className="text-sm text-gray-600">Explore different categories</p>
+                  <h3 className="font-semibold text-gray-800">Beat the Clock</h3>
+                  <p className="text-sm text-gray-600">Race against time</p>
                 </div>
               </div>
 
               <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
                 <h3 className="text-xl font-bold mb-2">How to Play</h3>
                 <ul className="text-left space-y-2 text-sm">
+                  <li>• Choose your difficulty level (Basic, Intermediate, Advanced)</li>
+                  <li>• Basic: 3-minute time limit, simple themes, unlimited shuffles</li>
+                  <li>• Intermediate: 2.5-minute time limit, mixed themes, limited shuffles</li>
+                  <li>• Advanced: 2-minute time limit, complex themes, no shuffles</li>
                   <li>• Select letters from the 4x4 grid to form words</li>
                   <li>• Words must be at least 3 letters long</li>
                   <li>• All words must relate to the current theme</li>
                   <li>• Use Validate to check your word</li>
-                  <li>• Use Shuffle to rearrange letters</li>
+                  <li>• Use Shuffle to rearrange letters (if available)</li>
                   <li>• Try to find as many words as possible!</li>
                 </ul>
               </div>
@@ -89,7 +110,7 @@ const WordshakeHome: React.FC<WordshakeHomeProps> = ({
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
-              onClick={onStartGame}
+              onClick={handleStartGame}
               className="flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 hover:scale-105 shadow-lg"
             >
               <Play size={24} />
@@ -105,7 +126,7 @@ const WordshakeHome: React.FC<WordshakeHomeProps> = ({
             </button>
             
             <button
-              onClick={onShowLeaderboard}
+              onClick={handleShowLeaderboard}
               className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-md"
             >
               <Trophy size={20} />
@@ -119,6 +140,19 @@ const WordshakeHome: React.FC<WordshakeHomeProps> = ({
       <VocabularyInstructionsModal
         isOpen={showInstructions}
         onClose={() => setShowInstructions(false)}
+      />
+
+      {/* Leaderboard Modal */}
+      <VocabularyLeaderboardModal
+        isOpen={showLeaderboard}
+        onClose={() => setShowLeaderboard(false)}
+      />
+
+      {/* Difficulty Selection Modal */}
+      <VocabularyDifficultyModal
+        isOpen={showDifficultySelection}
+        onClose={() => setShowDifficultySelection(false)}
+        onSelectDifficulty={handleSelectDifficulty}
       />
     </>
   );
