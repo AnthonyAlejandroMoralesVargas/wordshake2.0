@@ -44,8 +44,28 @@ const LetterGrid: React.FC<LetterGridProps> = ({
           const isHint = showHint && hintIndices.includes(index);
           const isCurrentHint = isHint && hintIndices.indexOf(index) === currentHintIndex;
           
+          // Calculate hint color based on position
+          const hintPosition = isHint ? hintIndices.indexOf(index) : -1;
+          const totalHintLetters = hintIndices.length;
+          let hintColor = '#FFEE8C'; // Default middle tone
+          
+          if (isCurrentHint && hintPosition >= 0) {
+            if (hintPosition === 0) {
+              // First letter - lighter yellow
+              hintColor = '#FFF7D6';
+            } else if (hintPosition === totalHintLetters - 1) {
+              // Last letter - darker yellow
+              hintColor = '#FFE066';
+            } else {
+              // Middle letters - gradient based on position
+              const progress = hintPosition / (totalHintLetters - 1);
+              const lightness = 0.8 - (progress * 0.2); // From 80% to 60% lightness
+              hintColor = `hsl(60, 100%, ${lightness * 100}%)`;
+            }
+          }
+          
           if (isCurrentHint) {
-            console.log(`Letter ${index} (${letter}) is current hint`);
+            console.log(`Letter ${index} (${letter}) is current hint at position ${hintPosition}`);
           }
           
           return (
@@ -65,7 +85,7 @@ const LetterGrid: React.FC<LetterGridProps> = ({
                 min-h-[3rem] sm:min-h-[4rem] md:min-h-[5rem] lg:min-h-[6rem]
               `}
               style={{
-                backgroundColor: isCurrentHint ? '#FFEE8C' : undefined,
+                backgroundColor: isCurrentHint ? hintColor : undefined,
                 color: isCurrentHint ? '#000000' : undefined,
                 transform: isCurrentHint ? 'scale(1.05)' : undefined,
                 boxShadow: isCurrentHint ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)' : undefined

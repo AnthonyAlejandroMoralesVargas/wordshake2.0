@@ -345,29 +345,26 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
         const interval = setInterval(() => {
           setCurrentHintIndex(prev => {
             if (prev >= wordIndices.length - 1) {
-              // Finished the word, wait 2 seconds then restart
-              setTimeout(() => {
-                setCurrentHintIndex(0);
-              }, 2000);
+              // Finished the word, stop the animation
+              clearInterval(interval);
+              setHintAnimationInterval(null);
               return prev;
             } else {
               return prev + 1;
             }
           });
-        }, 500); // 500ms between each letter
+        }, 800); // 800ms between each letter
         
         setHintAnimationInterval(interval);
         
-        // Stop the animation after 10 seconds total
+        // Clean up hint state after animation completes
+        const totalAnimationTime = wordIndices.length * 800 + 1000; // Total time + 1 second buffer
         setTimeout(() => {
-          if (hintAnimationInterval) {
-            clearInterval(hintAnimationInterval);
-          }
           setShowHint(false);
           setHintIndices([]);
           setCurrentHintIndex(0);
           setHintAnimationInterval(null);
-        }, 10000);
+        }, totalAnimationTime);
       }
     } else {
       console.log('No formable word found');
