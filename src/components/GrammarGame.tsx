@@ -182,6 +182,8 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       setMicrophone(null);
       setAnalyser(null);
       setIsListening(false);
+      setIsCorrect(null);
+      setShowFeedback(false);
       setGameState(prev => ({ ...prev, isRecording: false }));
     };
   }, [gameState.currentSentenceIndex]);
@@ -727,7 +729,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       }));
     }
     
-    // Reset states
+    // Reset ALL recording states completely
     setTranscript('');
     setUserRecording(null);
     setRecordingSatisfied(false);
@@ -736,6 +738,8 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     setMicrophone(null);
     setAnalyser(null);
     setIsListening(false);
+    setIsCorrect(null);
+    setShowFeedback(false);
     setGameState(prev => ({ ...prev, isRecording: false }));
     
     setShowSkipConfirm(false);
