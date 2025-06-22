@@ -50,6 +50,18 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
+  const [silenceTimer, setSilenceTimer] = useState<number | null>(null);
+  const [lastSpeechTime, setLastSpeechTime] = useState<number>(0);
+  const [isRecognitionActive, setIsRecognitionActive] = useState(false);
+  const [recognitionRetryCount, setRecognitionRetryCount] = useState(0);
+  const [maxRetries] = useState(3);
+  const [recognitionRetryTimer, setRecognitionRetryTimer] = useState<number | null>(null);
+  const [recordingStatus, setRecordingStatus] = useState<'idle' | 'starting' | 'ready' | 'listening' | 'processing'>('idle');
+  const [countdown, setCountdown] = useState<number>(0);
+  const [countdownTimer, setCountdownTimer] = useState<number | null>(null);
+  const [recordingDuration, setRecordingDuration] = useState<number>(0);
+  const [recordingDurationTimer, setRecordingDurationTimer] = useState<number | null>(null);
+  const [hasSpoken, setHasSpoken] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
@@ -59,75 +71,243 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     // Initialize speech recognition
     const initSpeechRecognition = () => {
       try {
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-          const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-          const recognitionInstance = new SpeechRecognition();
-          recognitionInstance.continuous = false;
-          recognitionInstance.interimResults = false;
-          recognitionInstance.lang = 'en-US';
-          recognitionInstance.maxAlternatives = 1;
-
-          recognitionInstance.onresult = (event: any) => {
-            console.log('Speech recognition result:', event);
-            if (event.results && event.results.length > 0) {
-              const transcript = event.results[0][0].transcript;
-              console.log('Transcript:', transcript);
-              setTranscript(transcript);
-              // Don't auto-check answer, let user decide
-            }
-          };
-
-          recognitionInstance.onerror = (event: any) => {
-            console.error('Speech recognition error:', event.error);
-            setIsListening(false);
-            setGameState(prev => ({ ...prev, isRecording: false }));
-            
-            if (event.error === 'not-allowed') {
-              alert('Microphone access denied. Please allow microphone access and try again.');
-            } else if (event.error === 'no-speech') {
-              alert('No speech detected. Please speak clearly and try again.');
-            } else {
-              alert(`Speech recognition error: ${event.error}. Please try again.`);
-            }
-          };
-
-          recognitionInstance.onend = () => {
-            console.log('Speech recognition ended');
-            setIsListening(false);
-            setGameState(prev => ({ ...prev, isRecording: false }));
-          };
-
-          recognitionInstance.onstart = () => {
-            console.log('Speech recognition started');
-          };
-
-          setRecognition(recognitionInstance);
-          console.log('Speech recognition initialized successfully');
+        console.log('Starting speech recognition initialization...');
+        console.log('Window object:', window);
+        console.log('webkitSpeechRecognition in window:', 'webkitSpeechRecognition' in window);
+        console.log('SpeechRecognition in window:', 'SpeechRecognition' in window);
+        
+        let SpeechRecognition: any = null;
+        
+        // Try different ways to get SpeechRecognition
+        if ('SpeechRecognition' in window) {
+          SpeechRecognition = (window as any).SpeechRecognition;
+          console.log('Using SpeechRecognition');
+        } else if ('webkitSpeechRecognition' in window) {
+          SpeechRecognition = (window as any).webkitSpeechRecognition;
+          console.log('Using webkitSpeechRecognition');
         } else {
-          console.error('Speech recognition not supported in this browser');
+          console.error('No speech recognition API found');
           alert('Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.');
+          return;
         }
+        
+        if (!SpeechRecognition) {
+          console.error('SpeechRecognition constructor not found');
+          alert('Speech recognition constructor not found. Please use a supported browser.');
+          return;
+        }
+        
+        console.log('Creating recognition instance...');
+        const recognitionInstance = new SpeechRecognition();
+        
+        if (!recognitionInstance) {
+          console.error('Failed to create recognition instance');
+          alert('Failed to create speech recognition instance. Please refresh and try again.');
+          return;
+        }
+        
+        console.log('Recognition instance created successfully');
+        
+        // Improved recognition settings for better accuracy
+        try {
+          recognitionInstance.continuous = true; // Keep listening
+          recognitionInstance.interimResults = true; // Get interim results
+          recognitionInstance.lang = 'en-US';
+          recognitionInstance.maxAlternatives = 3; // Get multiple alternatives
+          
+          // Additional settings for better performance
+          recognitionInstance.grammars = null; // No grammar restrictions
+          recognitionInstance.serviceURI = ''; // Use default service
+          
+          console.log('Recognition settings applied successfully');
+        } catch (settingsError) {
+          console.error('Error applying recognition settings:', settingsError);
+          // Continue with default settings
+        }
+
+        recognitionInstance.onresult = (event: any) => {
+          console.log('Speech recognition result:', event);
+          
+          let finalTranscript = '';
+          let interimTranscript = '';
+          
+          // Process all results
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript;
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+          
+          console.log('Final transcript:', finalTranscript);
+          console.log('Interim transcript:', interimTranscript);
+          
+          // Update transcript with best result
+          const bestTranscript = finalTranscript || interimTranscript;
+          if (bestTranscript) {
+            setTranscript(bestTranscript);
+            
+            // Mark that user has spoken
+            if (!hasSpoken) {
+              setHasSpoken(true);
+            }
+            
+            // If we have a final result, mark as processing
+            if (finalTranscript) {
+              setRecordingStatus('processing');
+            }
+          }
+        };
+
+        recognitionInstance.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
+          
+          // Handle different error types appropriately
+          switch (event.error) {
+            case 'not-allowed':
+              setIsListening(false);
+              setIsRecognitionActive(false);
+              setRecordingStatus('idle');
+              setGameState(prev => ({ ...prev, isRecording: false }));
+              alert('Microphone access denied. Please allow microphone access and try again.');
+              break;
+              
+            case 'no-speech':
+              console.log('No speech detected - this is normal');
+              // Don't stop recording, just log it
+              break;
+              
+            case 'aborted':
+              console.log('Speech recognition aborted - this is normal when stopping');
+              break;
+              
+            case 'network':
+              console.log('Network error in speech recognition');
+              // Try to restart recognition after a delay
+              setTimeout(() => {
+                if (isListening && !isRecognitionActive) {
+                  console.log('Attempting to restart speech recognition after network error');
+                  startSpeechRecognitionWithRetry();
+                }
+              }, 2000);
+              break;
+              
+            case 'audio-capture':
+              console.log('Audio capture error');
+              setIsListening(false);
+              setIsRecognitionActive(false);
+              setRecordingStatus('idle');
+              setGameState(prev => ({ ...prev, isRecording: false }));
+              alert('Audio capture error. Please check your microphone and try again.');
+              break;
+              
+            case 'not-supported':
+              console.log('Speech recognition not supported');
+              setIsListening(false);
+              setIsRecognitionActive(false);
+              setRecordingStatus('idle');
+              setGameState(prev => ({ ...prev, isRecording: false }));
+              alert('Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.');
+              break;
+              
+            default:
+              console.log(`Speech recognition error: ${event.error}`);
+              // For other errors, try to restart recognition
+              setTimeout(() => {
+                if (isListening && !isRecognitionActive && recognitionRetryCount < maxRetries) {
+                  console.log('Attempting to restart speech recognition after error');
+                  startSpeechRecognitionWithRetry();
+                }
+              }, 1000);
+              break;
+          }
+        };
+
+        recognitionInstance.onend = () => {
+          console.log('Speech recognition ended');
+          setIsListening(false);
+          setIsRecognitionActive(false);
+          setGameState(prev => ({ ...prev, isRecording: false }));
+        };
+
+        recognitionInstance.onstart = () => {
+          console.log('Speech recognition started');
+          setIsRecognitionActive(true);
+        };
+
+        recognitionInstance.onaudiostart = () => {
+          console.log('Audio capturing started');
+        };
+
+        recognitionInstance.onaudioend = () => {
+          console.log('Audio capturing ended');
+        };
+
+        recognitionInstance.onsoundstart = () => {
+          console.log('Sound detected');
+        };
+
+        recognitionInstance.onsoundend = () => {
+          console.log('Sound ended');
+        };
+
+        recognitionInstance.onspeechstart = () => {
+          console.log('Speech started');
+        };
+
+        recognitionInstance.onspeechend = () => {
+          console.log('Speech ended');
+        };
+
+        setRecognition(recognitionInstance);
+        console.log('Speech recognition initialized successfully');
+        
       } catch (error) {
         console.error('Error initializing speech recognition:', error);
-        alert('Error initializing speech recognition. Please refresh the page and try again.');
+        console.error('Error details:', {
+          name: error instanceof Error ? error.name : 'Unknown',
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : 'No stack trace'
+        });
+        
+        // Try to provide more specific error messages
+        if (error instanceof Error) {
+          if (error.name === 'TypeError' && error.message.includes('SpeechRecognition')) {
+            alert('Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.');
+          } else if (error.name === 'ReferenceError') {
+            alert('Speech recognition API not found. Please use a supported browser.');
+          } else {
+            alert(`Speech recognition initialization failed: ${error.message}. Please refresh the page and try again.`);
+          }
+        } else {
+          alert('Unknown error initializing speech recognition. Please refresh the page and try again.');
+        }
       }
     };
 
     // Initialize audio context for visualization
     const initAudioContext = async () => {
       try {
+        console.log('Initializing audio context...');
         const context = new (window.AudioContext || (window as any).webkitAudioContext)();
         setAudioContext(context);
         console.log('Audio context initialized successfully');
       } catch (error) {
         console.error('Error initializing audio context:', error);
+        // Don't show alert for audio context error, it's not critical
       }
     };
 
-    initSpeechRecognition();
-    initAudioContext();
+    // Add a small delay before initialization to ensure browser is ready
+    const initTimeout = setTimeout(() => {
+      initSpeechRecognition();
+      initAudioContext();
+    }, 100);
 
     return () => {
+      clearTimeout(initTimeout);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -277,16 +457,31 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     console.log('Starting recording...');
     console.log('Recognition available:', !!recognition);
     console.log('Audio context available:', !!audioContext);
+    console.log('Recognition active:', isRecognitionActive);
 
     if (!recognition) {
-      alert('Speech recognition not initialized. Please refresh the page and try again.');
+      console.error('Speech recognition not available');
+      alert('Speech recognition is not available. Please refresh the page and try again.');
       return;
     }
 
     if (!audioContext) {
-      alert('Audio context not initialized. Please refresh the page and try again.');
+      console.error('Audio context not available');
+      alert('Audio context is not available. Please refresh the page and try again.');
       return;
     }
+
+    // Prevent multiple simultaneous recordings
+    if (isListening || isRecognitionActive) {
+      console.log('Recording already in progress, stopping first');
+      await stopRecording();
+      // Wait a bit before starting new recording
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    // Reset retry count for new recording session
+    setRecognitionRetryCount(0);
+    setRecordingStatus('starting');
 
     try {
       console.log('Requesting microphone access...');
@@ -304,6 +499,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       
       // Resume audio context if suspended
       if (audioContext.state === 'suspended') {
+        console.log('Resuming suspended audio context...');
         await audioContext.resume();
       }
       
@@ -337,16 +533,19 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       setMediaRecorder(recorder);
       recorder.start();
       
-      console.log('Starting speech recognition...');
-      // Start speech recognition
-      recognition.start();
-      setGameState(prev => ({ ...prev, isRecording: true }));
+      // Start countdown to indicate when user should speak
+      setRecordingStatus('ready');
+      startCountdown();
       
-      console.log('Recording started successfully');
+      console.log('Starting speech recognition...');
+      // Start speech recognition with retry logic
+      await startSpeechRecognitionWithRetry();
       
     } catch (error) {
       console.error('Error starting recording:', error);
       setIsListening(false);
+      setIsRecognitionActive(false);
+      setRecordingStatus('idle');
       setGameState(prev => ({ ...prev, isRecording: false }));
       
       if (error instanceof Error) {
@@ -354,6 +553,8 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
           alert('Microphone access denied. Please allow microphone access in your browser settings and try again.');
         } else if (error.name === 'NotFoundError') {
           alert('No microphone found. Please connect a microphone and try again.');
+        } else if (error.name === 'NotSupportedError') {
+          alert('Microphone not supported. Please use a different device or browser.');
         } else {
           alert(`Error accessing microphone: ${error.message}. Please try again.`);
         }
@@ -363,30 +564,155 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     }
   };
 
-  const stopRecording = () => {
+  const startCountdown = () => {
+    setCountdown(3);
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setRecordingStatus('listening');
+          // Play a beep sound to indicate start
+          playStartBeep();
+          // Start recording duration timer
+          startRecordingDurationTimer();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    setCountdownTimer(timer);
+  };
+
+  const playStartBeep = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+      console.log('Could not play start beep:', error);
+    }
+  };
+
+  const startRecordingDurationTimer = () => {
+    setRecordingDuration(0);
+    const timer = setInterval(() => {
+      setRecordingDuration(prev => prev + 1);
+    }, 1000);
+    setRecordingDurationTimer(timer);
+  };
+
+  const startSpeechRecognitionWithRetry = async () => {
+    if (!recognition) return;
+
+    try {
+      // Stop any existing recognition first
+      if (isRecognitionActive) {
+        try {
+          recognition.stop();
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (error) {
+          console.log('Error stopping existing recognition:', error);
+        }
+      }
+
+      recognition.start();
+      setGameState(prev => ({ ...prev, isRecording: true }));
+      console.log('Speech recognition started successfully');
+    } catch (error) {
+      console.error('Error starting speech recognition:', error);
+      
+      // Retry logic with exponential backoff
+      if (recognitionRetryCount < maxRetries) {
+        console.log(`Retrying speech recognition (${recognitionRetryCount + 1}/${maxRetries})...`);
+        setRecognitionRetryCount(prev => prev + 1);
+        
+        // Exponential backoff: 1s, 2s, 4s
+        const retryDelay = Math.pow(2, recognitionRetryCount) * 1000;
+        
+        // Wait before retry
+        const retryTimeout = setTimeout(() => {
+          startSpeechRecognitionWithRetry();
+        }, retryDelay);
+        setRecognitionRetryTimer(retryTimeout);
+      } else {
+        console.log('Max retries reached, continuing without speech recognition');
+        // Continue recording without speech recognition
+        setGameState(prev => ({ ...prev, isRecording: true }));
+        setRecordingStatus('listening');
+        alert('Speech recognition failed to start, but recording is active. You can manually stop when finished.');
+      }
+    }
+  };
+
+  const stopRecording = async () => {
     console.log('Stopping recording...');
     
+    // Clear all timers
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+      setSilenceTimer(null);
+    }
+    
+    if (recognitionRetryTimer) {
+      clearTimeout(recognitionRetryTimer);
+      setRecognitionRetryTimer(null);
+    }
+
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      setCountdownTimer(null);
+    }
+
+    if (recordingDurationTimer) {
+      clearInterval(recordingDurationTimer);
+      setRecordingDurationTimer(null);
+    }
+    
+    setRecordingStatus('processing');
+    
     try {
-      if (recognition) {
+      // Stop speech recognition first
+      if (recognition && isRecognitionActive) {
         console.log('Stopping speech recognition...');
-        recognition.stop();
+        try {
+          recognition.stop();
+        } catch (error) {
+          console.log('Speech recognition already stopped or error stopping:', error);
+        }
       }
       
+      // Stop media recorder
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         console.log('Stopping media recorder...');
         mediaRecorder.stop();
       }
       
+      // Disconnect audio nodes
       if (microphone) {
         console.log('Disconnecting microphone...');
         microphone.disconnect();
       }
       
-      // Don't stop the stream here, keep it for potential re-recording
-      // Only disconnect the audio nodes
+      // Reset states
       setMicrophone(null);
       setAnalyser(null);
       setIsListening(false);
+      setIsRecognitionActive(false);
+      setRecognitionRetryCount(0);
+      setRecordingStatus('idle');
+      setHasSpoken(false);
       setGameState(prev => ({ ...prev, isRecording: false }));
       
       console.log('Recording stopped successfully');
@@ -396,6 +722,10 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       setMicrophone(null);
       setAnalyser(null);
       setIsListening(false);
+      setIsRecognitionActive(false);
+      setRecognitionRetryCount(0);
+      setRecordingStatus('idle');
+      setHasSpoken(false);
       setGameState(prev => ({ ...prev, isRecording: false }));
     }
   };
@@ -434,8 +764,29 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     }
   };
 
-  const reRecord = () => {
+  const reRecord = async () => {
     console.log('Starting re-recording...');
+    
+    // Clear any existing timers
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+      setSilenceTimer(null);
+    }
+    
+    if (recognitionRetryTimer) {
+      clearTimeout(recognitionRetryTimer);
+      setRecognitionRetryTimer(null);
+    }
+
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      setCountdownTimer(null);
+    }
+
+    if (recordingDurationTimer) {
+      clearInterval(recordingDurationTimer);
+      setRecordingDurationTimer(null);
+    }
     
     // Clean up previous recording
     setUserRecording(null);
@@ -454,12 +805,17 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     setMicrophone(null);
     setAnalyser(null);
     setIsListening(false);
+    setIsRecognitionActive(false);
+    setRecognitionRetryCount(0);
+    setRecordingStatus('idle');
+    setHasSpoken(false);
+    setRecordingDuration(0);
     setGameState(prev => ({ ...prev, isRecording: false }));
     
     // Start new recording after a short delay
     setTimeout(() => {
       startRecording();
-    }, 100);
+    }, 500);
   };
 
   const getPointsPerSentence = () => {
@@ -488,13 +844,13 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       userNormalized: userAnswerLower
     });
     
-    // Simple similarity check (can be improved with more sophisticated algorithms)
+    // Improved similarity check with lower threshold for better recognition
     const similarity = calculateSimilarity(userAnswerLower, correctAnswer);
-    const isAnswerCorrect = similarity > 0.7; // 70% similarity threshold
+    const isAnswerCorrect = similarity > 0.6; // Lowered threshold to 60%
     
     console.log('Similarity result:', {
       similarity: similarity,
-      threshold: 0.7,
+      threshold: 0.6,
       isCorrect: isAnswerCorrect
     });
     
@@ -535,6 +891,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
         setMicrophone(null);
         setAnalyser(null);
         setIsListening(false);
+        setIsRecognitionActive(false);
         setGameState(prev => ({ ...prev, isRecording: false }));
         
         // Check if this was the last sentence
@@ -563,6 +920,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
         setMicrophone(null);
         setAnalyser(null);
         setIsListening(false);
+        setIsRecognitionActive(false);
         setGameState(prev => ({ ...prev, isRecording: false }));
       }, 5000);
     }
@@ -587,21 +945,82 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       return 0;
     }
     
-    // Find common words (case-insensitive comparison)
-    const commonWords = words1.filter(word => 
+    // Improved similarity calculation with multiple metrics
+    
+    // 1. Exact word match
+    const exactMatches = words1.filter(word => 
       words2.some(correctWord => correctWord === word)
     );
     
-    const similarity = commonWords.length / Math.max(words1.length, words2.length);
+    // 2. Partial word matches (for typos/mispronunciations)
+    const partialMatches = words1.filter(word => 
+      words2.some(correctWord => 
+        correctWord.includes(word) || word.includes(correctWord) || 
+        levenshteinDistance(word, correctWord) <= 2
+      )
+    );
+    
+    // 3. Character-level similarity for very similar words
+    const charSimilarity = calculateCharacterSimilarity(normalizedStr1, normalizedStr2);
+    
+    // Combine metrics with weights
+    const exactWeight = 0.6;
+    const partialWeight = 0.3;
+    const charWeight = 0.1;
+    
+    const exactScore = exactMatches.length / Math.max(words1.length, words2.length);
+    const partialScore = partialMatches.length / Math.max(words1.length, words2.length);
+    
+    const finalSimilarity = (exactScore * exactWeight) + (partialScore * partialWeight) + (charSimilarity * charWeight);
     
     console.log('Similarity calculation:', {
-      commonWords: commonWords,
-      commonCount: commonWords.length,
-      maxLength: Math.max(words1.length, words2.length),
-      similarity: similarity
+      exactMatches: exactMatches,
+      partialMatches: partialMatches,
+      exactScore: exactScore,
+      partialScore: partialScore,
+      charSimilarity: charSimilarity,
+      finalSimilarity: finalSimilarity
     });
     
-    return similarity;
+    return finalSimilarity;
+  };
+
+  const levenshteinDistance = (str1: string, str2: string): number => {
+    const matrix: number[][] = [];
+    
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i];
+    }
+    
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j;
+    }
+    
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    
+    return matrix[str2.length][str1.length];
+  };
+
+  const calculateCharacterSimilarity = (str1: string, str2: string): number => {
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+    
+    if (longer.length === 0) return 1.0;
+    
+    const distance = levenshteinDistance(longer, shorter);
+    return (longer.length - distance) / longer.length;
   };
 
   const drawVisualization = () => {
@@ -645,6 +1064,27 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
     
+    // Clear all timers
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+      setSilenceTimer(null);
+    }
+    
+    if (recognitionRetryTimer) {
+      clearTimeout(recognitionRetryTimer);
+      setRecognitionRetryTimer(null);
+    }
+
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      setCountdownTimer(null);
+    }
+
+    if (recordingDurationTimer) {
+      clearInterval(recordingDurationTimer);
+      setRecordingDurationTimer(null);
+    }
+    
     setGameState({
       currentSession: null,
       currentSentenceIndex: 0,
@@ -672,6 +1112,13 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     setAudioChunks([]);
     setIsCorrect(null);
     setShowFeedback(false);
+    setLastSpeechTime(0);
+    setIsRecognitionActive(false);
+    setRecognitionRetryCount(0);
+    setRecordingStatus('idle');
+    setCountdown(0);
+    setRecordingDuration(0);
+    setHasSpoken(false);
   };
 
   const exitGame = () => {
@@ -679,6 +1126,28 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
+    
+    // Clear all timers
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+      setSilenceTimer(null);
+    }
+    
+    if (recognitionRetryTimer) {
+      clearTimeout(recognitionRetryTimer);
+      setRecognitionRetryTimer(null);
+    }
+
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      setCountdownTimer(null);
+    }
+
+    if (recordingDurationTimer) {
+      clearInterval(recordingDurationTimer);
+      setRecordingDurationTimer(null);
+    }
+    
     onBack();
   };
 
@@ -710,6 +1179,27 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     
     console.log('Skipping sentence confirmed');
     
+    // Clear all timers
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+      setSilenceTimer(null);
+    }
+    
+    if (recognitionRetryTimer) {
+      clearTimeout(recognitionRetryTimer);
+      setRecognitionRetryTimer(null);
+    }
+
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      setCountdownTimer(null);
+    }
+
+    if (recordingDurationTimer) {
+      clearInterval(recordingDurationTimer);
+      setRecordingDurationTimer(null);
+    }
+    
     // Clean up recording resources
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
@@ -738,9 +1228,16 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     setMicrophone(null);
     setAnalyser(null);
     setIsListening(false);
+    setIsRecognitionActive(false);
+    setRecognitionRetryCount(0);
+    setRecordingStatus('idle');
+    setCountdown(0);
+    setRecordingDuration(0);
+    setHasSpoken(false);
     setIsCorrect(null);
     setShowFeedback(false);
     setGameState(prev => ({ ...prev, isRecording: false }));
+    setLastSpeechTime(0);
     
     setShowSkipConfirm(false);
   };
@@ -908,9 +1405,9 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
             {!isListening && !userRecording && (
               <button
                 onClick={startRecording}
-                disabled={!recognition}
+                disabled={!recognition || isListening}
                 className={`px-8 py-4 rounded-full text-xl font-semibold transition-colors shadow-lg ${
-                  !recognition
+                  !recognition || isListening
                     ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                     : 'bg-red-500 text-white hover:bg-red-600'
                 }`}
@@ -921,12 +1418,63 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
 
             {isListening && (
               <div className="space-y-4">
-                <button
-                  onClick={stopRecording}
-                  className="px-8 py-4 bg-gray-500 text-white rounded-full text-xl font-semibold hover:bg-gray-600 transition-colors shadow-lg"
-                >
-                  ⏹️ Stop Recording
-                </button>
+                {/* Status Indicator */}
+                <div className="text-center">
+                  {recordingStatus === 'starting' && (
+                    <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg">
+                      <p className="font-semibold">🔄 Initializing recording...</p>
+                    </div>
+                  )}
+                  
+                  {recordingStatus === 'ready' && countdown > 0 && (
+                    <div className="bg-blue-100 text-blue-800 px-6 py-4 rounded-lg">
+                      <p className="text-2xl font-bold mb-2">Get Ready!</p>
+                      <p className="text-4xl font-bold text-blue-600">{countdown}</p>
+                      <p className="text-sm mt-2">Start speaking when you hear the beep</p>
+                    </div>
+                  )}
+                  
+                  {recordingStatus === 'listening' && (
+                    <div className="bg-green-100 text-green-800 px-6 py-4 rounded-lg">
+                      <div className="flex items-center justify-center space-x-4 mb-2">
+                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                        <p className="text-2xl font-bold">🎤 RECORDING</p>
+                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                      </div>
+                      <p className="text-lg font-semibold">Duration: {recordingDuration}s</p>
+                      {hasSpoken ? (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium text-green-700">✅ Speech detected!</p>
+                          <p className="text-sm text-green-600">Press "Stop Recording" when finished</p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-green-600">Speak the sentence clearly</p>
+                      )}
+                    </div>
+                  )}
+                  
+                  {recordingStatus === 'processing' && (
+                    <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded-lg">
+                      <p className="font-semibold">⏳ Processing your speech...</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-center space-x-4">
+                  <button
+                    onClick={stopRecording}
+                    className="px-8 py-4 bg-red-500 text-white rounded-full text-xl font-semibold hover:bg-red-600 transition-colors shadow-lg"
+                  >
+                    ⏹️ Stop Recording
+                  </button>
+                  
+                  {hasSpoken && (
+                    <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg flex items-center">
+                      <span className="text-lg mr-2">💡</span>
+                      <span className="text-sm">Ready to stop? Click the red button above!</span>
+                    </div>
+                  )}
+                </div>
                 
                 {/* Audio Visualization */}
                 <div className="mt-4 flex justify-center">
@@ -939,8 +1487,27 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
                 </div>
                 
                 <div className="bg-blue-50 rounded-lg p-4">
-                  <p className="text-blue-800 font-semibold">🎯 Speak the sentence clearly</p>
-                  <p className="text-blue-600 text-sm mt-1">Make sure to pronounce each word correctly</p>
+                  <p className="text-blue-800 font-semibold">🎯 Instructions:</p>
+                  <ul className="text-blue-600 text-sm mt-2 space-y-1">
+                    {recordingStatus === 'ready' && countdown > 0 && (
+                      <li>• Wait for the countdown to finish</li>
+                    )}
+                    {recordingStatus === 'listening' && (
+                      <>
+                        <li>• Speak the sentence clearly and slowly</li>
+                        <li>• Take your time to pronounce each word correctly</li>
+                        <li>• When finished, click the red "Stop Recording" button</li>
+                        {!hasSpoken && (
+                          <li>• <strong>Tip:</strong> Start speaking to see the "Stop Recording" hint</li>
+                        )}
+                      </>
+                    )}
+                    {recognitionRetryCount > 0 && (
+                      <li className="text-orange-600">
+                        🔄 Retrying speech recognition... ({recognitionRetryCount}/{maxRetries})
+                      </li>
+                    )}
+                  </ul>
                 </div>
               </div>
             )}
