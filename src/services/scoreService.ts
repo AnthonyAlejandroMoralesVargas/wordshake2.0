@@ -1,0 +1,118 @@
+import { apiRequest } from '../utils/apiConfig';
+
+export interface VocabularyMatchRequest {
+  player_email: string;
+  num_words: number;
+  difficulty: string;
+  score: number;
+  time: number;
+}
+
+export interface GrammarMatchRequest {
+  player_email: string;
+  session_name: string;
+  difficulty: string;
+  time: number;
+  score: number;
+  completion: number;
+}
+
+export interface ListeningMatchRequest {
+  player_email: string;
+  score: number;
+  accuracy: number;
+  name_video: string;
+  difficulty: string;
+  time: number;
+}
+
+export interface PlayerScores {
+  vocabulary_matches: VocabularyMatchRequest[];
+  grammar_matches: GrammarMatchRequest[];
+  listening_matches: ListeningMatchRequest[];
+}
+
+export class ScoreService {
+  // Guardar puntuación de Vocabulary
+  static async saveVocabularyScore(scoreData: VocabularyMatchRequest): Promise<void> {
+    try {
+      await apiRequest('/vocabulary/save-score', {
+        method: 'POST',
+        body: JSON.stringify(scoreData)
+      });
+    } catch (error) {
+      console.error('Error saving vocabulary score:', error);
+      throw error;
+    }
+  }
+
+  // Guardar puntuación de Grammar
+  static async saveGrammarScore(scoreData: GrammarMatchRequest): Promise<void> {
+    try {
+      await apiRequest('/grammar/save-score', {
+        method: 'POST',
+        body: JSON.stringify(scoreData)
+      });
+    } catch (error) {
+      console.error('Error saving grammar score:', error);
+      throw error;
+    }
+  }
+
+  // Guardar puntuación de Listening
+  static async saveListeningScore(scoreData: ListeningMatchRequest): Promise<void> {
+    try {
+      await apiRequest('/listening/save-score', {
+        method: 'POST',
+        body: JSON.stringify(scoreData)
+      });
+    } catch (error) {
+      console.error('Error saving listening score:', error);
+      throw error;
+    }
+  }
+
+  // Obtener puntuaciones de un jugador
+  static async getPlayerScores(email: string): Promise<PlayerScores> {
+    try {
+      const response = await apiRequest(`/player/${email}/scores`);
+      return response.data || { vocabulary_matches: [], grammar_matches: [], listening_matches: [] };
+    } catch (error) {
+      console.error('Error getting player scores:', error);
+      throw error;
+    }
+  }
+
+  // Obtener leaderboard de Vocabulary
+  static async getVocabularyLeaderboard(limit: number = 10): Promise<VocabularyMatchRequest[]> {
+    try {
+      const response = await apiRequest(`/vocabulary/leaderboard?limit=${limit}`);
+      return response.data || [];
+    } catch (error) {
+      console.error('Error getting vocabulary leaderboard:', error);
+      throw error;
+    }
+  }
+
+  // Obtener leaderboard de Grammar
+  static async getGrammarLeaderboard(limit: number = 10): Promise<GrammarMatchRequest[]> {
+    try {
+      const response = await apiRequest(`/grammar/leaderboard?limit=${limit}`);
+      return response.data || [];
+    } catch (error) {
+      console.error('Error getting grammar leaderboard:', error);
+      throw error;
+    }
+  }
+
+  // Obtener leaderboard de Listening
+  static async getListeningLeaderboard(limit: number = 10): Promise<ListeningMatchRequest[]> {
+    try {
+      const response = await apiRequest(`/listening/leaderboard?limit=${limit}`);
+      return response.data || [];
+    } catch (error) {
+      console.error('Error getting listening leaderboard:', error);
+      throw error;
+    }
+  }
+} 
