@@ -878,52 +878,34 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       streamRef.current = null;
     }
     
-    if (isAnswerCorrect) {
-      // If correct, automatically move to next sentence after 2 seconds
-      setTimeout(() => {
-        setShowFeedback(false);
-        setIsCorrect(null);
-        setTranscript('');
-        setUserRecording(null);
-        setRecordingSatisfied(false);
-        setAudioChunks([]);
-        setMediaRecorder(null);
-        setMicrophone(null);
-        setAnalyser(null);
-        setIsListening(false);
-        setIsRecognitionActive(false);
-        setGameState(prev => ({ ...prev, isRecording: false }));
-        
-        // Check if this was the last sentence
-        const nextSentenceIndex = gameState.currentSentenceIndex + 1;
-        if (gameState.currentSession && nextSentenceIndex >= gameState.currentSession.sentences.length) {
-          // This was the last sentence, end the game
-          endGame();
-        } else {
-          // Move to next sentence
-          setGameState(prev => ({
-            ...prev,
-            currentSentenceIndex: nextSentenceIndex
-          }));
-        }
-      }, 2000);
+    // Move to next sentence or end game
+    const nextSentenceIndex = gameState.currentSentenceIndex + 1;
+    if (gameState.currentSession && nextSentenceIndex >= gameState.currentSession.sentences.length) {
+      // This was the last sentence, end the game
+      endGame();
     } else {
-      // If incorrect, show message for 5 seconds then clear
-      setTimeout(() => {
-        setShowFeedback(false);
-        setIsCorrect(null);
-        setTranscript('');
-        setUserRecording(null);
-        setRecordingSatisfied(false);
-        setAudioChunks([]);
-        setMediaRecorder(null);
-        setMicrophone(null);
-        setAnalyser(null);
-        setIsListening(false);
-        setIsRecognitionActive(false);
-        setGameState(prev => ({ ...prev, isRecording: false }));
-      }, 5000);
+      // Move to next sentence
+      setGameState(prev => ({
+        ...prev,
+        currentSentenceIndex: nextSentenceIndex
+      }));
     }
+    
+    // Reset all recording states for next sentence
+    setTranscript('');
+    setUserRecording(null);
+    setRecordingSatisfied(false);
+    setAudioChunks([]);
+    setMediaRecorder(null);
+    setMicrophone(null);
+    setAnalyser(null);
+    setIsListening(false);
+    setIsRecognitionActive(false);
+    setGameState(prev => ({ ...prev, isRecording: false }));
+    setHasSpoken(false);
+    setRecordingStatus('idle');
+    setCountdown(0);
+    setRecordingDuration(0);
   };
 
   const calculateSimilarity = (str1: string, str2: string): number => {
