@@ -6,10 +6,12 @@ interface GrammarResultsModalProps {
   totalSentences: number;
   sessionTitle: string;
   difficulty: string;
+  finalScore: number;
   onSaveScore: (playerName: string) => void;
   onRestart: () => void;
   onLeaderboard: () => void;
   onBack: () => void;
+  autoSaved?: boolean;
 }
 
 const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
@@ -18,10 +20,12 @@ const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
   totalSentences,
   sessionTitle,
   difficulty,
+  finalScore,
   onSaveScore,
   onRestart,
   onLeaderboard,
-  onBack
+  onBack,
+  autoSaved = false
 }) => {
   const [playerName, setPlayerName] = useState('');
   const [showNameInput, setShowNameInput] = useState(true);
@@ -49,6 +53,26 @@ const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
     } else {
       return "Keep practicing to improve your skills!";
     }
+  };
+
+  const getPerformanceRating = () => {
+    const completionRate = getCompletionRate();
+    const avgTimePerSentence = totalTime / sentencesCompleted;
+    
+    if (completionRate === 100 && avgTimePerSentence < 30000) {
+      return { rating: "Excellent", color: "text-green-600", bgColor: "bg-green-100" };
+    } else if (completionRate >= 80 && avgTimePerSentence < 45000) {
+      return { rating: "Very Good", color: "text-blue-600", bgColor: "bg-blue-100" };
+    } else if (completionRate >= 60) {
+      return { rating: "Good", color: "text-yellow-600", bgColor: "bg-yellow-100" };
+    } else {
+      return { rating: "Needs Practice", color: "text-red-600", bgColor: "bg-red-100" };
+    }
+  };
+
+  const getAverageTimePerSentence = () => {
+    if (sentencesCompleted === 0) return 0;
+    return Math.floor(totalTime / sentencesCompleted / 1000);
   };
 
   const getDifficultyColor = () => {
@@ -99,7 +123,7 @@ const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
           </div>
 
           {/* Results */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className="bg-green-50 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold text-green-600">
                 {sentencesCompleted}/{totalSentences}
@@ -118,6 +142,12 @@ const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
               </div>
               <div className="text-sm text-purple-700">Total Time</div>
             </div>
+            <div className="bg-orange-50 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-orange-600">
+                {finalScore}/100
+              </div>
+              <div className="text-sm text-orange-700">Final Score</div>
+            </div>
           </div>
 
           {/* Performance Message */}
@@ -127,8 +157,60 @@ const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
             </p>
           </div>
 
+          {/* Detailed Performance Feedback */}
+          <div className="bg-gray-50 rounded-lg p-6 mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+              Performance Analysis
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className={`rounded-lg p-4 text-center ${getPerformanceRating().bgColor}`}>
+                <div className={`text-xl font-bold ${getPerformanceRating().color}`}>
+                  {getPerformanceRating().rating}
+                </div>
+                <div className="text-sm text-gray-600 mt-1">Performance Rating</div>
+              </div>
+              <div className="bg-blue-50 rounded-lg p-4 text-center">
+                <div className="text-xl font-bold text-blue-600">
+                  {getAverageTimePerSentence()}s
+                </div>
+                <div className="text-sm text-gray-600 mt-1">Avg. Time per Sentence</div>
+              </div>
+            </div>
+            
+            {/* Performance Tips */}
+            <div className="mt-4 p-4 bg-white rounded-lg">
+              <h4 className="font-semibold text-gray-800 mb-2">How to improve:</h4>
+              <ul className="space-y-1 text-sm text-gray-700">
+                {getPerformanceRating().rating === "Excellent" && (
+                  <li>• Outstanding performance! Try a higher difficulty level</li>
+                )}
+                {getPerformanceRating().rating === "Very Good" && (
+                  <>
+                    <li>• Great work! Focus on pronunciation accuracy</li>
+                    <li>• Practice speaking at a natural pace</li>
+                  </>
+                )}
+                {getPerformanceRating().rating === "Good" && (
+                  <>
+                    <li>• Good foundation! Practice more to improve speed</li>
+                    <li>• Review grammar patterns before recording</li>
+                    <li>• Take your time to pronounce clearly</li>
+                  </>
+                )}
+                {getPerformanceRating().rating === "Needs Practice" && (
+                  <>
+                    <li>• Practice basic pronunciation first</li>
+                    <li>• Listen to the sentence multiple times</li>
+                    <li>• Focus on completing more sentences</li>
+                    <li>• Don't rush - accuracy is more important than speed</li>
+                  </>
+                )}
+              </ul>
+            </div>
+          </div>
+
           {/* Name Input */}
-          {showNameInput && !scoreSaved && (
+          {showNameInput && !scoreSaved && !autoSaved && (
             <div className="mb-6">
               <label htmlFor="playerName" className="block text-sm font-medium text-gray-700 mb-2">
                 Enter your name to save your score:
@@ -157,11 +239,16 @@ const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
           )}
 
           {/* Score Saved Message */}
-          {scoreSaved && (
+          {(scoreSaved || autoSaved) && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
               <p className="text-center text-green-800 font-semibold">
-                ✅ Score saved successfully!
+                {autoSaved ? '✅ Score automatically saved!' : '✅ Score saved successfully!'}
               </p>
+              {autoSaved && (
+                <p className="text-center text-green-700 text-sm mt-1">
+                  Your score has been added to the leaderboard as "Anonymous Player"
+                </p>
+              )}
             </div>
           )}
 

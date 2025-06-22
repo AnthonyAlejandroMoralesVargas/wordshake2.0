@@ -128,6 +128,8 @@ export interface GrammarScore {
   sessionTitle: string;
   difficulty: string;
   totalTime: number;
+  finalScore: number;
+  maxScore: number;
   date: string;
   sentencesCompleted: number;
   totalSentences: number;

@@ -29,6 +29,12 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
+  const [showSkipConfirm, setShowSkipConfirm] = useState(false);
+  const [autoSavedScore, setAutoSavedScore] = useState(false);
+  const [showAutoSaveFeedback, setShowAutoSaveFeedback] = useState(false);
+  const [currentScore, setCurrentScore] = useState(0);
+  const [totalPossiblePoints, setTotalPossiblePoints] = useState(0);
+  const [correctlyCompletedSentences, setCorrectlyCompletedSentences] = useState(0);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
@@ -43,6 +49,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
   const [recordingSatisfied, setRecordingSatisfied] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const [currentTime, setCurrentTime] = useState(0);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
@@ -135,10 +142,29 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
   }, []);
 
   useEffect(() => {
-    if (gameState.currentSession && gameState.currentSentenceIndex >= gameState.currentSession.sentences.length) {
+    if (gameState.currentSession && 
+        gameState.currentSentenceIndex >= gameState.currentSession.sentences.length && 
+        !gameState.gameEnded) {
       endGame();
     }
-  }, [gameState.currentSentenceIndex, gameState.currentSession]);
+  }, [gameState.currentSentenceIndex, gameState.currentSession, gameState.gameEnded]);
+
+  // Timer effect - updates every second when game is started
+  useEffect(() => {
+    let interval: number;
+    
+    if (gameState.gameStarted && !gameState.gameEnded) {
+      interval = setInterval(() => {
+        setCurrentTime(Math.floor((Date.now() - gameState.startTime) / 1000));
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [gameState.gameStarted, gameState.gameEnded, gameState.startTime]);
 
   // Clean up when sentence changes
   useEffect(() => {
@@ -163,24 +189,61 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
   const startGame = () => {
     const session = getRandomSession(difficulty);
     const startTime = Date.now();
+    const totalPoints = 100;
+    const pointsPerSentence = Math.floor(totalPoints / session.sentences.length);
+    
     setGameState(prev => ({
       ...prev,
       currentSession: session,
       gameStarted: true,
       startTime
     }));
+    setCurrentScore(0);
+    setTotalPossiblePoints(totalPoints);
+    setCorrectlyCompletedSentences(0);
     setShowInstructions(false);
   };
 
   const endGame = () => {
     const endTime = Date.now();
     const totalTime = endTime - gameState.startTime;
+    const finalScore = Math.round(currentScore); // Round to nearest integer
+    
     setGameState(prev => ({
       ...prev,
       gameEnded: true,
       endTime,
       totalTime
     }));
+    
+    // Auto-save score with anonymous player name
+    if (gameState.currentSession) {
+      const score: any = {
+        id: Date.now().toString(),
+        playerName: 'Anonymous Player',
+        sessionTitle: gameState.currentSession.title,
+        difficulty: gameState.currentSession.difficulty,
+        totalTime: totalTime,
+        finalScore: finalScore,
+        maxScore: 100,
+        date: new Date().toISOString(),
+        sentencesCompleted: correctlyCompletedSentences,
+        totalSentences: gameState.currentSession.sentences.length
+      };
+
+      const existingScores = JSON.parse(localStorage.getItem('grammarScores') || '[]');
+      existingScores.push(score);
+      localStorage.setItem('grammarScores', JSON.stringify(existingScores));
+      
+      setAutoSavedScore(true);
+      setShowAutoSaveFeedback(true);
+      
+      // Hide auto-save feedback after 3 seconds
+      setTimeout(() => {
+        setShowAutoSaveFeedback(false);
+      }, 3000);
+    }
+    
     setShowResults(true);
   };
 
@@ -397,6 +460,11 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     }, 100);
   };
 
+  const getPointsPerSentence = () => {
+    if (!gameState.currentSession) return 0;
+    return Math.floor(100 / gameState.currentSession.sentences.length);
+  };
+
   const submitRecording = () => {
     if (!userRecording || !transcript) {
       alert('Please record your pronunciation first.');
@@ -406,13 +474,43 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     if (!gameState.currentSession) return;
 
     const currentSentence = gameState.currentSession.sentences[gameState.currentSentenceIndex];
+    
+    // Normalize both strings to lowercase and trim whitespace
     const correctAnswer = currentSentence.text.toLowerCase().trim();
     const userAnswerLower = transcript.toLowerCase().trim();
+    
+    console.log('Comparing answers:', {
+      original: currentSentence.text,
+      correct: correctAnswer,
+      user: transcript,
+      userNormalized: userAnswerLower
+    });
     
     // Simple similarity check (can be improved with more sophisticated algorithms)
     const similarity = calculateSimilarity(userAnswerLower, correctAnswer);
     const isAnswerCorrect = similarity > 0.7; // 70% similarity threshold
     
+    console.log('Similarity result:', {
+      similarity: similarity,
+      threshold: 0.7,
+      isCorrect: isAnswerCorrect
+    });
+    
+    // Calculate points for this sentence
+    const pointsPerSentence = getPointsPerSentence();
+    const earnedPoints = isAnswerCorrect ? pointsPerSentence : 0;
+    
+    console.log('Scoring:', {
+      pointsPerSentence,
+      earnedPoints,
+      currentScore,
+      newScore: currentScore + earnedPoints
+    });
+    
+    setCurrentScore(prev => prev + earnedPoints);
+    if (isAnswerCorrect) {
+      setCorrectlyCompletedSentences(prev => prev + 1);
+    }
     setIsCorrect(isAnswerCorrect);
     setShowFeedback(true);
     
@@ -422,37 +520,86 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       streamRef.current = null;
     }
     
-    setTimeout(() => {
-      setShowFeedback(false);
-      setIsCorrect(null);
-      setTranscript('');
-      setUserRecording(null);
-      setRecordingSatisfied(false);
-      setAudioChunks([]);
-      setMediaRecorder(null);
-      setMicrophone(null);
-      setAnalyser(null);
-      setIsListening(false);
-      setGameState(prev => ({ ...prev, isRecording: false }));
-      
-      if (isAnswerCorrect) {
-        // Move to next sentence
-        setGameState(prev => ({
-          ...prev,
-          currentSentenceIndex: prev.currentSentenceIndex + 1
-        }));
-      }
-    }, 2000);
+    if (isAnswerCorrect) {
+      // If correct, automatically move to next sentence after 2 seconds
+      setTimeout(() => {
+        setShowFeedback(false);
+        setIsCorrect(null);
+        setTranscript('');
+        setUserRecording(null);
+        setRecordingSatisfied(false);
+        setAudioChunks([]);
+        setMediaRecorder(null);
+        setMicrophone(null);
+        setAnalyser(null);
+        setIsListening(false);
+        setGameState(prev => ({ ...prev, isRecording: false }));
+        
+        // Check if this was the last sentence
+        const nextSentenceIndex = gameState.currentSentenceIndex + 1;
+        if (gameState.currentSession && nextSentenceIndex >= gameState.currentSession.sentences.length) {
+          // This was the last sentence, end the game
+          endGame();
+        } else {
+          // Move to next sentence
+          setGameState(prev => ({
+            ...prev,
+            currentSentenceIndex: nextSentenceIndex
+          }));
+        }
+      }, 2000);
+    } else {
+      // If incorrect, show message for 5 seconds then clear
+      setTimeout(() => {
+        setShowFeedback(false);
+        setIsCorrect(null);
+        setTranscript('');
+        setUserRecording(null);
+        setRecordingSatisfied(false);
+        setAudioChunks([]);
+        setMediaRecorder(null);
+        setMicrophone(null);
+        setAnalyser(null);
+        setIsListening(false);
+        setGameState(prev => ({ ...prev, isRecording: false }));
+      }, 5000);
+    }
   };
 
   const calculateSimilarity = (str1: string, str2: string): number => {
-    const words1 = str1.split(' ').filter(word => word.length > 0);
-    const words2 = str2.split(' ').filter(word => word.length > 0);
+    // Ensure both strings are normalized to lowercase and trimmed
+    const normalizedStr1 = str1.toLowerCase().trim();
+    const normalizedStr2 = str2.toLowerCase().trim();
     
-    if (words1.length === 0 || words2.length === 0) return 0;
+    // Split into words and filter out empty strings
+    const words1 = normalizedStr1.split(/\s+/).filter(word => word.length > 0);
+    const words2 = normalizedStr2.split(/\s+/).filter(word => word.length > 0);
     
-    const commonWords = words1.filter(word => words2.includes(word));
-    return commonWords.length / Math.max(words1.length, words2.length);
+    console.log('Word comparison:', {
+      words1: words1,
+      words2: words2
+    });
+    
+    if (words1.length === 0 || words2.length === 0) {
+      console.log('Empty word arrays detected');
+      return 0;
+    }
+    
+    // Find common words (case-insensitive comparison)
+    const commonWords = words1.filter(word => 
+      words2.some(correctWord => correctWord === word)
+    );
+    
+    const similarity = commonWords.length / Math.max(words1.length, words2.length);
+    
+    console.log('Similarity calculation:', {
+      commonWords: commonWords,
+      commonCount: commonWords.length,
+      maxLength: Math.max(words1.length, words2.length),
+      similarity: similarity
+    });
+    
+    return similarity;
   };
 
   const drawVisualization = () => {
@@ -507,9 +654,16 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       endTime: 0,
       totalTime: 0
     });
+    setCurrentTime(0);
     setShowResults(false);
     setShowRestartConfirm(false);
     setShowInstructions(true);
+    setShowSkipConfirm(false);
+    setAutoSavedScore(false);
+    setShowAutoSaveFeedback(false);
+    setCurrentScore(0);
+    setTotalPossiblePoints(0);
+    setCorrectlyCompletedSentences(0);
     setUserRecording(null);
     setTranscript('');
     setRecordingSatisfied(false);
@@ -536,13 +690,55 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       difficulty: gameState.currentSession.difficulty,
       totalTime: gameState.totalTime,
       date: new Date().toISOString(),
-      sentencesCompleted: gameState.currentSentenceIndex,
+      sentencesCompleted: correctlyCompletedSentences,
       totalSentences: gameState.currentSession.sentences.length
     };
 
     const existingScores = JSON.parse(localStorage.getItem('grammarScores') || '[]');
     existingScores.push(score);
     localStorage.setItem('grammarScores', JSON.stringify(existingScores));
+  };
+
+  const skipSentence = () => {
+    setShowSkipConfirm(true);
+  };
+
+  const confirmSkip = () => {
+    if (!gameState.currentSession) return;
+    
+    console.log('Skipping sentence confirmed');
+    
+    // Clean up recording resources
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    
+    // Move to next sentence immediately
+    const nextSentenceIndex = gameState.currentSentenceIndex + 1;
+    if (gameState.currentSession && nextSentenceIndex >= gameState.currentSession.sentences.length) {
+      // This was the last sentence, end the game
+      endGame();
+    } else {
+      // Move to next sentence
+      setGameState(prev => ({
+        ...prev,
+        currentSentenceIndex: nextSentenceIndex
+      }));
+    }
+    
+    // Reset states
+    setTranscript('');
+    setUserRecording(null);
+    setRecordingSatisfied(false);
+    setAudioChunks([]);
+    setMediaRecorder(null);
+    setMicrophone(null);
+    setAnalyser(null);
+    setIsListening(false);
+    setGameState(prev => ({ ...prev, isRecording: false }));
+    
+    setShowSkipConfirm(false);
   };
 
   if (showInstructions) {
@@ -555,26 +751,38 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     );
   }
 
-  if (showResults) {
+  if (showLeaderboard) {
+    console.log('Showing leaderboard modal, showLeaderboard state:', showLeaderboard);
     return (
-      <GrammarResultsModal
-        totalTime={gameState.totalTime}
-        sentencesCompleted={gameState.currentSentenceIndex}
-        totalSentences={gameState.currentSession?.sentences.length || 0}
-        sessionTitle={gameState.currentSession?.title || ''}
-        difficulty={difficulty}
-        onSaveScore={saveScore}
-        onRestart={() => setShowRestartConfirm(true)}
-        onLeaderboard={() => setShowLeaderboard(true)}
-        onBack={onBack}
+      <GrammarLeaderboardModal
+        onBack={() => {
+          console.log('Leaderboard back button clicked');
+          setShowLeaderboard(false);
+        }}
       />
     );
   }
 
-  if (showLeaderboard) {
+  if (showResults) {
+    console.log('Rendering results modal, showLeaderboard state:', showLeaderboard);
     return (
-      <GrammarLeaderboardModal
-        onBack={() => setShowLeaderboard(false)}
+      <GrammarResultsModal
+        totalTime={gameState.totalTime}
+        sentencesCompleted={correctlyCompletedSentences}
+        totalSentences={gameState.currentSession?.sentences.length || 0}
+        sessionTitle={gameState.currentSession?.title || ''}
+        difficulty={difficulty}
+        finalScore={Math.round(currentScore)}
+        onSaveScore={saveScore}
+        onRestart={restartGame}
+        onLeaderboard={() => {
+          console.log('Leaderboard button clicked from results modal');
+          console.log('Setting showLeaderboard to true');
+          setShowLeaderboard(true);
+          console.log('showLeaderboard should now be true');
+        }}
+        onBack={onBack}
+        autoSaved={autoSavedScore}
       />
     );
   }
@@ -615,7 +823,10 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
           <div className="mt-4">
             <div className="flex justify-between text-sm text-gray-600 mb-2">
               <span>Sentence {gameState.currentSentenceIndex + 1} of {gameState.currentSession.sentences.length}</span>
-              <span>Time: {Math.floor((Date.now() - gameState.startTime) / 1000)}s</span>
+              <div className="flex gap-4">
+                <span>Time: {gameState.gameStarted ? currentTime : 0}s</span>
+                <span>Score: {currentScore}/100</span>
+              </div>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
@@ -633,11 +844,6 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
             <h2 className="text-3xl font-bold text-gray-800 mb-4">
               {currentSentence.text}
             </h2>
-            {currentSentence.translation && (
-              <p className="text-lg text-gray-600 italic">
-                {currentSentence.translation}
-              </p>
-            )}
             {currentSentence.grammarPoint && (
               <p className="text-sm text-blue-600 mt-2">
                 Grammar: {currentSentence.grammarPoint}
@@ -657,6 +863,13 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
               }`}
             >
               {gameState.isPlaying ? 'Playing...' : '🔊 Play Sentence'}
+            </button>
+            
+            <button
+              onClick={skipSentence}
+              className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-semibold"
+            >
+              ⏭️ Skip Sentence
             </button>
           </div>
 
@@ -712,7 +925,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
                 </button>
                 
                 {/* Audio Visualization */}
-                <div className="mt-4">
+                <div className="mt-4 flex justify-center">
                   <canvas
                     ref={canvasRef}
                     width={400}
@@ -777,16 +990,46 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
               isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
             }`}>
               <p className="font-semibold">
-                {isCorrect ? '✅ Correct! Moving to next sentence...' : '❌ Try again with better pronunciation'}
+                {isCorrect 
+                  ? `✅ Correct! +${getPointsPerSentence()} points` 
+                  : '❌ Try again with better pronunciation'
+                }
               </p>
+              {!isCorrect && (
+                <p className="text-sm mt-1">
+                  You can skip this sentence (no points, no penalty)
+                </p>
+              )}
             </div>
           )}
         </div>
       </div>
 
+      {/* Auto-save Feedback */}
+      {showAutoSaveFeedback && (
+        <div className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg z-50">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">
+                ¡Partida guardada automáticamente!
+              </p>
+              <p className="text-xs mt-1">
+                Tu puntuación ha sido añadida al leaderboard
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Confirmation Modals */}
       {showExitConfirm && (
         <ConfirmationModal
+          isOpen={showExitConfirm}
           title="Exit Game"
           message="Are you sure you want to exit? Your progress will be lost."
           onConfirm={exitGame}
@@ -796,10 +1039,21 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
 
       {showRestartConfirm && (
         <ConfirmationModal
+          isOpen={showRestartConfirm}
           title="Restart Game"
           message="Are you sure you want to restart? Your current progress will be lost."
           onConfirm={restartGame}
           onCancel={() => setShowRestartConfirm(false)}
+        />
+      )}
+
+      {showSkipConfirm && (
+        <ConfirmationModal
+          isOpen={showSkipConfirm}
+          title="Skip Sentence"
+          message="Are you sure you want to skip this sentence? You won't receive any points for this sentence."
+          onConfirm={confirmSkip}
+          onCancel={() => setShowSkipConfirm(false)}
         />
       )}
     </div>

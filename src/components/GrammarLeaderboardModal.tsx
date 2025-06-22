@@ -193,6 +193,9 @@ const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ onBac
                       Time
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Score
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Completion
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -231,6 +234,11 @@ const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ onBac
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm font-semibold text-gray-900">
                           {formatTime(score.totalTime)}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm font-semibold text-gray-900">
+                          {score.finalScore}/{score.maxScore}
                         </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
