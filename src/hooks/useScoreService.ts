@@ -168,12 +168,16 @@ export const useScoreService = () => {
     }
   }, []);
 
-  const getListeningLeaderboard = useCallback(async (limit: number = 10) => {
+  const getListeningLeaderboard = useCallback(async (difficulty: string = "All", limit: number = 10) => {
     setLoading(true);
     setError(null);
-
     try {
-      const leaderboard = await ScoreService.getListeningLeaderboard(limit);
+      let leaderboard;
+      if (difficulty === "All") {
+        leaderboard = await ScoreService.getListeningLeaderboard(limit);
+      } else {
+        leaderboard = await ScoreService.getListeningLeaderboardByDifficulty(difficulty, limit);
+      }
       return leaderboard;
     } catch (err: any) {
       setError(err.message || 'Failed to get listening leaderboard');

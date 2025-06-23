@@ -1,6 +1,6 @@
-import React from 'react';
-import { X, Trophy, Medal, Award, Clock, Target, BarChart3 } from 'lucide-react';
-import { getListeningLeaderboard, formatDate, formatTime } from '../utils/scoreUtils';
+import { Award, BarChart3, Clock, Medal, Target, Trophy, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useScoreService } from '../hooks/useScoreService';
 import { ListeningScore } from '../types';
 
 interface ListeningLeaderboardModalProps {
@@ -8,11 +8,41 @@ interface ListeningLeaderboardModalProps {
   onClose: () => void;
 }
 
+const DIFFICULTIES = ["All", "Beginner", "Intermediate", "Advanced"];
+
 const ListeningLeaderboardModal: React.FC<ListeningLeaderboardModalProps> = ({
   isOpen,
   onClose
 }) => {
-  const leaderboard = getListeningLeaderboard(20);
+  const { getListeningLeaderboard, loading } = useScoreService();
+  const [difficultyFilter, setDifficultyFilter] = useState<string>('All');
+  const [scores, setScores] = useState<ListeningScore[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadScores();
+    }
+    // eslint-disable-next-line
+  }, [isOpen, difficultyFilter]);
+
+  const loadScores = async () => {
+    const apiScores = await getListeningLeaderboard(difficultyFilter, 20);
+    // Mapea los datos de la API al tipo ListeningScore si es necesario
+    const mappedScores: ListeningScore[] = (apiScores || []).map((score: any, idx: number) => ({
+      id: score.idMatch?.toString() || idx.toString(),
+      playerName: score.player || 'Unknown',
+      score: score.score,
+      maxScore: 100, // Ajusta si tu API retorna el máximo
+      percentage: score.accuracy || 0,
+      correctAnswers: score.correctAnswers || 0, // Ajusta si tu API retorna esto
+      totalBlanks: score.totalBlanks || 0, // Ajusta si tu API retorna esto
+      videoTitle: score.name_video || '-',
+      difficulty: score.difficulty,
+      date: score.date,
+      timeSpent: score.time || 0,
+    }));
+    setScores(mappedScores);
+  };
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Trophy size={20} className="text-yellow-500" />;
@@ -27,6 +57,23 @@ const ListeningLeaderboardModal: React.FC<ListeningLeaderboardModalProps> = ({
     if (score >= 70) return 'text-yellow-600';
     if (score >= 60) return 'text-orange-600';
     return 'text-red-600';
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   if (!isOpen) return null;
@@ -53,9 +100,30 @@ const ListeningLeaderboardModal: React.FC<ListeningLeaderboardModalProps> = ({
           </div>
         </div>
 
+        {/* Filters */}
+        <div className="bg-gray-50 px-6 py-4 border-b">
+          <div className="flex flex-wrap gap-4 items-center">
+            <span className="text-sm font-medium text-gray-700">Filter by Difficulty:</span>
+            <select
+              value={difficultyFilter}
+              onChange={e => setDifficultyFilter(e.target.value)}
+              className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              {DIFFICULTIES.map(d => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+            <div className="text-sm text-gray-600">
+              {scores.length} scores
+            </div>
+          </div>
+        </div>
+
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          {leaderboard.length === 0 ? (
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+          {loading ? (
+            <div className="text-center py-12">Loading...</div>
+          ) : scores.length === 0 ? (
             <div className="text-center py-12">
               <Trophy size={64} className="text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-600 mb-2">No scores yet</h3>
@@ -63,29 +131,6 @@ const ListeningLeaderboardModal: React.FC<ListeningLeaderboardModalProps> = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Legend */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <h4 className="font-semibold text-gray-800 mb-2">Scoring System:</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span>90-100: Excellent</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span>80-89: Very Good</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <span>70-79: Good</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                    <span>60-69: Fair</span>
-                  </div>
-                </div>
-              </div>
-
               {/* Leaderboard Table */}
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -102,7 +147,7 @@ const ListeningLeaderboardModal: React.FC<ListeningLeaderboardModalProps> = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {leaderboard.map((score, index) => (
+                    {scores.map((score, index) => (
                       <tr
                         key={score.id}
                         className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${
@@ -141,9 +186,10 @@ const ListeningLeaderboardModal: React.FC<ListeningLeaderboardModalProps> = ({
                         </td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            score.difficulty === 'beginner' ? 'bg-green-100 text-green-700' :
-                            score.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-red-100 text-red-700'
+                            score.difficulty === 'Beginner' ? 'bg-green-100 text-green-700' :
+                            score.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-700' :
+                            score.difficulty === 'Advanced' ? 'bg-red-100 text-red-700' :
+                            'bg-gray-100 text-gray-700'
                           }`}>
                             {score.difficulty}
                           </span>
@@ -170,7 +216,7 @@ const ListeningLeaderboardModal: React.FC<ListeningLeaderboardModalProps> = ({
         <div className="bg-gray-50 px-6 py-4 border-t">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-600">
-              Showing top {leaderboard.length} scores
+              Showing top {scores.length} scores
             </p>
             <button
               onClick={onClose}
