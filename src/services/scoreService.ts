@@ -115,4 +115,37 @@ export class ScoreService {
       throw error;
     }
   }
+
+  // Obtener leaderboard de Vocabulary por dificultad
+  static async getVocabularyLeaderboardByDifficulty(difficulty: string, limit: number = 10): Promise<VocabularyMatchRequest[]> {
+    try {
+      const response = await apiRequest(`/vocabulary_match/top-scores/by-difficulty/${difficulty}?limit=${limit}`);
+      return response.data || [];
+    } catch (error) {
+      console.error('Error getting vocabulary leaderboard by difficulty:', error);
+      throw error;
+    }
+  }
+
+  // Obtener leaderboard de Grammar por dificultad
+  static async getGrammarLeaderboardByDifficulty(difficulty: string, limit: number = 10): Promise<GrammarMatchRequest[]> {
+    try {
+      const response = await apiRequest(`/grammar_match/top-scores/by-difficulty/${difficulty}?limit=${limit}`);
+      return response.data || [];
+    } catch (error) {
+      console.error('Error getting grammar leaderboard by difficulty:', error);
+      throw error;
+    }
+  }
+
+  // Obtener leaderboard de Listening por dificultad
+  static async getListeningLeaderboardByDifficulty(difficulty: string, limit: number = 10): Promise<ListeningMatchRequest[]> {
+    try {
+      const response = await apiRequest(`/listening_match/top-scores/by-difficulty/${difficulty}?limit=${limit}`);
+      return response.data || [];
+    } catch (error) {
+      console.error('Error getting listening leaderboard by difficulty:', error);
+      throw error;
+    }
+  }
 } 

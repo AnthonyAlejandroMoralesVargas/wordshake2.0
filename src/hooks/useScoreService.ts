@@ -130,12 +130,16 @@ export const useScoreService = () => {
     }
   }, [user?.email]);
 
-  const getVocabularyLeaderboard = useCallback(async (limit: number = 10) => {
+  const getVocabularyLeaderboard = useCallback(async (difficulty: string = "All", limit: number = 10) => {
     setLoading(true);
     setError(null);
-
     try {
-      const leaderboard = await ScoreService.getVocabularyLeaderboard(limit);
+      let leaderboard;
+      if (difficulty === "All") {
+        leaderboard = await ScoreService.getVocabularyLeaderboard(limit);
+      } else {
+        leaderboard = await ScoreService.getVocabularyLeaderboardByDifficulty(difficulty, limit);
+      }
       return leaderboard;
     } catch (err: any) {
       setError(err.message || 'Failed to get vocabulary leaderboard');

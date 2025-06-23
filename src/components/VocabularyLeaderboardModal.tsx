@@ -1,87 +1,74 @@
-import React, { useState, useEffect } from 'react';
-import { X, Trophy, Star, Clock, Book, Filter, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowDown, ArrowUp, Book, Clock, Filter, Star, Trophy, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useScoreService } from '../hooks/useScoreService';
 import { VocabularyScore } from '../types';
-import { getVocabularyLeaderboard } from '../utils/scoreUtils';
 
 interface VocabularyLeaderboardModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const DIFFICULTIES = ["All", "Beginner", "Intermediate", "Advanced"];
+
 const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
   isOpen,
   onClose
 }) => {
+  const { getVocabularyLeaderboard, loading } = useScoreService();
   const [scores, setScores] = useState<VocabularyScore[]>([]);
-  const [filteredScores, setFilteredScores] = useState<VocabularyScore[]>([]);
   const [sortBy, setSortBy] = useState<'score' | 'stars' | 'wordsFound' | 'date'>('score');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
-  const [themeFilter, setThemeFilter] = useState<string>('all');
+  const [difficultyFilter, setDifficultyFilter] = useState<string>('All');
 
   useEffect(() => {
     if (isOpen) {
       loadScores();
     }
-  }, [isOpen]);
+    // eslint-disable-next-line
+  }, [isOpen, difficultyFilter]);
 
-  useEffect(() => {
-    filterAndSortScores();
-  }, [scores, sortBy, sortOrder, difficultyFilter, themeFilter]);
-
-  const loadScores = () => {
-    const leaderboardScores = getVocabularyLeaderboard(50);
-    setScores(leaderboardScores);
+  const loadScores = async () => {
+    const apiScores = await getVocabularyLeaderboard(difficultyFilter, 50);
+    // Mapea los datos de la API al tipo VocabularyScore si es necesario
+    const mappedScores: VocabularyScore[] = (apiScores || []).map((score: any, idx: number) => ({
+      id: score.idMatch?.toString() || idx.toString(),
+      playerName: score.player || 'Unknown',
+      score: score.score,
+      stars: score.stars || 0, // Ajusta si tu API retorna estrellas
+      wordsFound: score.num_words || 0,
+      theme: score.theme || '-', // Ajusta si tu API retorna tema
+      difficulty: score.difficulty,
+      date: score.date,
+      timeSpent: score.time || 0,
+    }));
+    setScores(mappedScores);
   };
 
-  const filterAndSortScores = () => {
-    let filtered = [...scores];
-
-    // Apply difficulty filter
-    if (difficultyFilter !== 'all') {
-      filtered = filtered.filter(score => score.difficulty === difficultyFilter);
+  const sortedScores = [...scores].sort((a, b) => {
+    let aValue: any, bValue: any;
+    switch (sortBy) {
+      case 'score':
+        aValue = a.score;
+        bValue = b.score;
+        break;
+      case 'stars':
+        aValue = a.stars;
+        bValue = b.stars;
+        break;
+      case 'wordsFound':
+        aValue = a.wordsFound;
+        bValue = b.wordsFound;
+        break;
+      case 'date':
+        aValue = new Date(a.date).getTime();
+        bValue = new Date(b.date).getTime();
+        break;
+      default:
+        aValue = a.score;
+        bValue = b.score;
     }
-
-    // Apply theme filter
-    if (themeFilter !== 'all') {
-      filtered = filtered.filter(score => score.theme === themeFilter);
-    }
-
-    // Sort scores
-    filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
-
-      switch (sortBy) {
-        case 'score':
-          aValue = a.score;
-          bValue = b.score;
-          break;
-        case 'stars':
-          aValue = a.stars;
-          bValue = b.stars;
-          break;
-        case 'wordsFound':
-          aValue = a.wordsFound;
-          bValue = b.wordsFound;
-          break;
-        case 'date':
-          aValue = new Date(a.date).getTime();
-          bValue = new Date(b.date).getTime();
-          break;
-        default:
-          aValue = a.score;
-          bValue = b.score;
-      }
-
-      if (sortOrder === 'asc') {
-        return aValue - bValue;
-      } else {
-        return bValue - aValue;
-      }
-    });
-
-    setFilteredScores(filtered);
-  };
+    return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+  });
 
   const handleSort = (field: 'score' | 'stars' | 'wordsFound' | 'date') => {
     if (sortBy === field) {
@@ -93,7 +80,7 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
   };
 
   const getDifficultyBadge = (difficulty: string) => {
-    switch (difficulty) {
+    switch (difficulty.toLowerCase()) {
       case 'beginner': return 'bg-green-100 text-green-800';
       case 'intermediate': return 'bg-blue-100 text-blue-800';
       case 'advanced': return 'bg-red-100 text-red-800';
@@ -111,21 +98,10 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
     });
   };
 
-  const formatTime = (milliseconds: number) => {
-    const seconds = Math.floor(milliseconds / 1000);
+  const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  const getUniqueDifficulties = () => {
-    const difficulties = [...new Set(scores.map(score => score.difficulty))];
-    return difficulties;
-  };
-
-  const getUniqueThemes = () => {
-    const themes = [...new Set(scores.map(score => score.theme))];
-    return themes;
   };
 
   if (!isOpen) return null;
@@ -159,40 +135,26 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
               <Filter size={20} className="text-gray-600" />
               <span className="text-sm font-medium text-gray-700">Filters:</span>
             </div>
-            
             <select
               value={difficultyFilter}
               onChange={(e) => setDifficultyFilter(e.target.value)}
               className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">All Difficulties</option>
-              {getUniqueDifficulties().map(difficulty => (
-                <option key={difficulty} value={difficulty}>
-                  {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
-                </option>
+              {DIFFICULTIES.map(d => (
+                <option key={d} value={d}>{d}</option>
               ))}
             </select>
-
-            <select
-              value={themeFilter}
-              onChange={(e) => setThemeFilter(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Themes</option>
-              {getUniqueThemes().map(theme => (
-                <option key={theme} value={theme}>{theme}</option>
-              ))}
-            </select>
-
             <div className="text-sm text-gray-600">
-              {filteredScores.length} of {scores.length} scores
+              {sortedScores.length} scores
             </div>
           </div>
         </div>
 
         {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)]">
-          {filteredScores.length === 0 ? (
+          {loading ? (
+            <div className="p-8 text-center">Loading...</div>
+          ) : sortedScores.length === 0 ? (
             <div className="p-8 text-center">
               <Trophy size={48} className="mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-600 mb-2">No scores found</h3>
@@ -240,7 +202,6 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
                         )}
                       </div>
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Theme</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Difficulty</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Time</th>
                     <th 
@@ -257,7 +218,7 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredScores.map((score, index) => (
+                  {sortedScores.map((score, index) => (
                     <tr key={score.id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
@@ -283,13 +244,8 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
                       </td>
                       <td className="py-3 px-4 font-medium">{score.wordsFound}</td>
                       <td className="py-3 px-4">
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-                          {score.theme}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
                         <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyBadge(score.difficulty)}`}>
-                          {score.difficulty.charAt(0).toUpperCase() + score.difficulty.slice(1)}
+                          {score.difficulty}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-sm text-gray-600">
