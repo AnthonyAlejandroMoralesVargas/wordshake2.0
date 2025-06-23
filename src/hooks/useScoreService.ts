@@ -149,12 +149,16 @@ export const useScoreService = () => {
     }
   }, []);
 
-  const getGrammarLeaderboard = useCallback(async (limit: number = 10) => {
+  const getGrammarLeaderboard = useCallback(async (difficulty: string = "All", limit: number = 10) => {
     setLoading(true);
     setError(null);
-
     try {
-      const leaderboard = await ScoreService.getGrammarLeaderboard(limit);
+      let leaderboard;
+      if (difficulty === "All") {
+        leaderboard = await ScoreService.getGrammarLeaderboard(limit);
+      } else {
+        leaderboard = await ScoreService.getGrammarLeaderboardByDifficulty(difficulty, limit);
+      }
       return leaderboard;
     } catch (err: any) {
       setError(err.message || 'Failed to get grammar leaderboard');
