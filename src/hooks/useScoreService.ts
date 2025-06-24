@@ -2,10 +2,17 @@ import { useCallback, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { GrammarMatchRequest, ListeningMatchRequest, ScoreService, VocabularyMatchRequest } from '../services/scoreService';
 
+// Contador global para generar IDs únicos
+let idCounter = 1;
+
 export const useScoreService = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const generateUniqueId = () => {
+    return idCounter++;
+  };
 
   const saveVocabularyScore = useCallback(async (
     numWords: number,
@@ -23,11 +30,13 @@ export const useScoreService = () => {
 
     try {
       const scoreData: VocabularyMatchRequest = {
-        player_email: user.email,
-        num_words: numWords,
+        idMatch: generateUniqueId(),
+        player: user.email,
+        num_words: Math.floor(numWords),
         difficulty,
-        score,
-        time
+        score: Math.floor(score),
+        time: Math.floor(time),
+        date: new Date().toISOString().replace('T', ' ').replace('Z', '')
       };
 
       await ScoreService.saveVocabularyScore(scoreData);
@@ -57,12 +66,14 @@ export const useScoreService = () => {
 
     try {
       const scoreData: GrammarMatchRequest = {
-        player_email: user.email,
+        idMatch: generateUniqueId(),
+        player: user.email,
         session_name: sessionName,
         difficulty,
-        time,
-        score,
-        completion
+        time: Math.floor(time),
+        score: Math.floor(score),
+        completion: Math.floor(completion),
+        date: new Date().toISOString().replace('T', ' ').replace('Z', '')
       };
 
       await ScoreService.saveGrammarScore(scoreData);
@@ -92,12 +103,14 @@ export const useScoreService = () => {
 
     try {
       const scoreData: ListeningMatchRequest = {
-        player_email: user.email,
-        score,
-        accuracy,
+        idMatch: generateUniqueId(),
+        player: user.email,
+        score: Math.floor(score),
+        accuracy: Math.floor(accuracy),
         name_video: nameVideo,
         difficulty,
-        time
+        time: Math.floor(time),
+        date: new Date().toISOString().replace('T', ' ').replace('Z', '')
       };
 
       await ScoreService.saveListeningScore(scoreData);

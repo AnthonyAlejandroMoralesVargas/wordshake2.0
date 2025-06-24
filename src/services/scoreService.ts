@@ -1,29 +1,35 @@
 import { apiRequest } from '../utils/apiConfig';
 
 export interface VocabularyMatchRequest {
-  player_email: string;
+  idMatch: number;
+  player: string;
   num_words: number;
   difficulty: string;
   score: number;
   time: number;
+  date: string;
 }
 
 export interface GrammarMatchRequest {
-  player_email: string;
+  idMatch: number;
+  player: string;
   session_name: string;
   difficulty: string;
   time: number;
   score: number;
   completion: number;
+  date: string;
 }
 
 export interface ListeningMatchRequest {
-  player_email: string;
+  idMatch: number;
+  player: string;
   score: number;
   accuracy: number;
   name_video: string;
   difficulty: string;
   time: number;
+  date: string;
 }
 
 export interface PlayerScores {
@@ -36,7 +42,8 @@ export class ScoreService {
   // Guardar puntuación de Vocabulary
   static async saveVocabularyScore(scoreData: VocabularyMatchRequest): Promise<void> {
     try {
-      await apiRequest('/vocabulary/save-score', {
+      console.log('Sending vocabulary score data:', JSON.stringify(scoreData, null, 2));
+      await apiRequest('/vocabulary_match/register', {
         method: 'POST',
         body: JSON.stringify(scoreData)
       });
@@ -49,7 +56,7 @@ export class ScoreService {
   // Guardar puntuación de Grammar
   static async saveGrammarScore(scoreData: GrammarMatchRequest): Promise<void> {
     try {
-      await apiRequest('/grammar/save-score', {
+      await apiRequest('/grammar_match/register', {
         method: 'POST',
         body: JSON.stringify(scoreData)
       });
@@ -62,7 +69,7 @@ export class ScoreService {
   // Guardar puntuación de Listening
   static async saveListeningScore(scoreData: ListeningMatchRequest): Promise<void> {
     try {
-      await apiRequest('/listening/save-score', {
+      await apiRequest('/listening_match/register', {
         method: 'POST',
         body: JSON.stringify(scoreData)
       });
@@ -86,7 +93,7 @@ export class ScoreService {
   // Obtener leaderboard de Vocabulary
   static async getVocabularyLeaderboard(limit: number = 10): Promise<VocabularyMatchRequest[]> {
     try {
-      const response = await apiRequest(`/vocabulary/leaderboard?limit=${limit}`);
+      const response = await apiRequest(`/vocabulary_match/top-scores/overall?limit=${limit}`);
       return response.data || [];
     } catch (error) {
       console.error('Error getting vocabulary leaderboard:', error);
@@ -97,7 +104,7 @@ export class ScoreService {
   // Obtener leaderboard de Grammar
   static async getGrammarLeaderboard(limit: number = 10): Promise<GrammarMatchRequest[]> {
     try {
-      const response = await apiRequest(`/grammar/leaderboard?limit=${limit}`);
+      const response = await apiRequest(`/grammar_match/top-scores/overall?limit=${limit}`);
       return response.data || [];
     } catch (error) {
       console.error('Error getting grammar leaderboard:', error);
@@ -108,7 +115,7 @@ export class ScoreService {
   // Obtener leaderboard de Listening
   static async getListeningLeaderboard(limit: number = 10): Promise<ListeningMatchRequest[]> {
     try {
-      const response = await apiRequest(`/listening/leaderboard?limit=${limit}`);
+      const response = await apiRequest(`/listening_match/top-scores/overall?limit=${limit}`);
       return response.data || [];
     } catch (error) {
       console.error('Error getting listening leaderboard:', error);

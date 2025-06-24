@@ -14,7 +14,12 @@ export const getAuthHeaders = () => {
 export const handleApiResponse = async (response: Response) => {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    console.error('API Error Response:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorData
+    });
+    throw new Error(errorData.detail || errorData.message || `HTTP error! status: ${response.status}`);
   }
   return response.json();
 };
