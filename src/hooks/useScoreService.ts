@@ -10,8 +10,9 @@ export const useScoreService = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Genera un ID aleatorio entre 1 y 2,000,000,000 (dentro del rango seguro de IntegerField)
   const generateUniqueId = () => {
-    return idCounter++;
+    return Math.floor(Math.random() * 2_000_000_000) + 1;
   };
 
   const saveVocabularyScore = useCallback(async (
