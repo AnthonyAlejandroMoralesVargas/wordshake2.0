@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { GrammarSession, GrammarSentence, GrammarGameState } from '../types';
+import React, { useEffect, useRef, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { getRandomSession } from '../data/grammarData';
+import { ScoreService } from '../services/scoreService';
+import { GrammarGameState } from '../types';
 import ConfirmationModal from './ConfirmationModal';
 import GrammarInstructionsModal from './GrammarInstructionsModal';
-import GrammarResultsModal from './GrammarResultsModal';
 import GrammarLeaderboardModal from './GrammarLeaderboardModal';
+import GrammarResultsModal from './GrammarResultsModal';
 
 interface GrammarGameProps {
   difficulty: string;
@@ -66,6 +68,14 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const streamRef = useRef<MediaStream | null>(null);
+
+  const { user } = useAuth();
+  const [hasSentMatch, setHasSentMatch] = useState(false);
+   // Genera un ID aleatorio entre 1 y 2,000,000,000 (dentro del rango seguro de IntegerField)
+  const generateUniqueId = () => {
+    return Math.floor(Math.random() * 2_000_000_000) + 1;
+  };
+
 
   useEffect(() => {
     // Initialize speech recognition
@@ -386,7 +396,11 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     setShowInstructions(false);
   };
 
-  const endGame = () => {
+  const endGame = async () => {
+    if (hasSentMatch) {
+      setShowResults(true);
+      return;
+    }
     const endTime = Date.now();
     const totalTime = endTime - gameState.startTime;
     const finalScore = Math.round(currentScore); // Round to nearest integer
@@ -398,7 +412,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       totalTime
     }));
 
-    // Auto-save score with anonymous player name
+    // Auto-save score with anonymous player name (localStorage)
     if (gameState.currentSession) {
       const score: any = {
         id: Date.now().toString(),
@@ -424,6 +438,27 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
       setTimeout(() => {
         setShowAutoSaveFeedback(false);
       }, 3000);
+    }
+
+    // --- POST al backend para persistir la partida ---
+    if (user && gameState.currentSession) {
+      const grammarMatch = {
+        idMatch: generateUniqueId(),
+        player: user.email,
+        session_name: gameState.currentSession.title,
+        difficulty: gameState.currentSession.difficulty,
+        time: Math.floor(totalTime / 1000),
+        score: Math.floor(finalScore),
+        completion: Math.round((correctlyCompletedSentences / gameState.currentSession.sentences.length) * 100),
+        date: new Date().toISOString().replace('T', ' ').replace('Z', '')
+      };
+      try {
+        await ScoreService.saveGrammarScore(grammarMatch);
+        setHasSentMatch(true);
+      } catch (error) {
+        console.error('Error sending grammar match to backend:', error);
+        // Puedes mostrar un mensaje de error si lo deseas
+      }
     }
 
     setShowResults(true);

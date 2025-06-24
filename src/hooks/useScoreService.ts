@@ -76,7 +76,7 @@ export const useScoreService = () => {
         completion: Math.floor(completion),
         date: new Date().toISOString().replace('T', ' ').replace('Z', '')
       };
-
+      console.log('Sending grammar score data:', JSON.stringify(scoreData, null, 2));
       await ScoreService.saveGrammarScore(scoreData);
       return true;
     } catch (err: any) {
