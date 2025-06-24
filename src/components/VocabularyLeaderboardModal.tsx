@@ -28,7 +28,7 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
   }, [isOpen, difficultyFilter]);
 
   const loadScores = async () => {
-    const apiScores = await getVocabularyLeaderboard(difficultyFilter, 50);
+    const apiScores = await getVocabularyLeaderboard(difficultyFilter.toLowerCase(), 50);
     // Mapea los datos de la API al tipo VocabularyScore si es necesario
     const mappedScores: VocabularyScore[] = (apiScores || []).map((score: any, idx: number) => ({
       id: score.idMatch?.toString() || idx.toString(),
