@@ -26,7 +26,7 @@ const ListeningLeaderboardModal: React.FC<ListeningLeaderboardModalProps> = ({
   }, [isOpen, difficultyFilter]);
 
   const loadScores = async () => {
-    const apiScores = await getListeningLeaderboard(difficultyFilter, 20);
+    const apiScores = await getListeningLeaderboard(difficultyFilter.toLowerCase(), 20);
     // Mapea los datos de la API al tipo ListeningScore si es necesario
     const mappedScores: ListeningScore[] = (apiScores || []).map((score: any, idx: number) => ({
       id: score.idMatch?.toString() || idx.toString(),

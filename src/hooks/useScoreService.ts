@@ -187,7 +187,7 @@ export const useScoreService = () => {
     setError(null);
     try {
       let leaderboard;
-      if (difficulty === "All") {
+      if (difficulty === "all") {
         leaderboard = await ScoreService.getListeningLeaderboard(limit);
       } else {
         leaderboard = await ScoreService.getListeningLeaderboardByDifficulty(difficulty, limit);
