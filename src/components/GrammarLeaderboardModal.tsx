@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useScoreService } from '../hooks/useScoreService';
 import { GrammarScore } from '../types';
 
@@ -14,12 +14,7 @@ const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ onBac
   const [filterDifficulty, setFilterDifficulty] = useState<string>('All');
   const [sortBy, setSortBy] = useState<'time' | 'date'>('time');
 
-  useEffect(() => {
-    loadScores();
-    // eslint-disable-next-line
-  }, [filterDifficulty]);
-
-  const loadScores = async () => {
+  const loadScores = useCallback(async () => {
     const apiScores = await getGrammarLeaderboard(filterDifficulty.toLowerCase(), 50);
     // Mapea los datos de la API al tipo GrammarScore si es necesario
     const mappedScores: GrammarScore[] = (apiScores || []).map((score: any, idx: number) => ({
@@ -35,7 +30,11 @@ const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ onBac
       totalSentences: score.totalSentences || 0, // Ajusta si tu API retorna esto
     }));
     setScores(mappedScores);
-  };
+  }, [getGrammarLeaderboard, filterDifficulty]);
+
+  useEffect(() => {
+    loadScores();
+  }, [loadScores]);
 
   const sortedScores = [...scores].sort((a, b) => {
     if (sortBy === 'time') {
