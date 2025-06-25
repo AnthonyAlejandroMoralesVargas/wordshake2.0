@@ -1,5 +1,7 @@
-import React from 'react';
-import { X, Trophy, Medal, Award, Play, Home, Volume2, Target, Clock, Star } from 'lucide-react';
+import { Award, Clock, Home, Medal, Play, Star, Target, Trophy, Volume2, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useScoreService } from '../hooks/useScoreService';
 import { ListeningExercise } from '../types';
 import { formatTime } from '../utils/scoreUtils';
 
@@ -28,7 +30,10 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
   hintsUsed,
   difficulty
 }) => {
-  if (!isOpen) return null;
+  const { user, isLoggedIn } = useAuth();
+  const { saveListeningScore, loading, error } = useScoreService();
+  const [scoreSaved, setScoreSaved] = useState(false);
+  const [showSaveFeedback, setShowSaveFeedback] = useState(false);
 
   const correctAnswers = exercise.blanks.filter(blank => {
     const userAnswer = userAnswers[blank.id] || '';
@@ -37,6 +42,49 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
 
   const totalBlanks = exercise.blanks.length;
   const accuracy = Math.round((correctAnswers / totalBlanks) * 100);
+
+  useEffect(() => {
+    if (isOpen && isLoggedIn && user) {
+      // Auto-save score when modal opens and user is logged in
+      handleAutoSave();
+    }
+  }, [isOpen, isLoggedIn, user]);
+
+  const handleAutoSave = async () => {
+    if (!isLoggedIn || !user) {
+      console.log('User not logged in, skipping score save');
+      return;
+    }
+
+    console.log('Saving listening score to API...');
+
+    try {
+      const success = await saveListeningScore(
+        score,                    // score
+        accuracy,                 // accuracy
+        exercise.videoId,         // name_video
+        difficulty,               // difficulty
+        timeSpent                 // time (already in seconds)
+      );
+
+      if (success) {
+        console.log('Score saved successfully to API');
+        setScoreSaved(true);
+        setShowSaveFeedback(true);
+
+        // Hide save feedback after 3 seconds
+        setTimeout(() => {
+          setShowSaveFeedback(false);
+        }, 3000);
+      } else {
+        console.error('Failed to save score to API');
+      }
+    } catch (error) {
+      console.error('Error saving score to API:', error);
+    }
+  };
+
+  if (!isOpen) return null;
 
   const getScoreMessage = () => {
     if (score >= 90) return "Excellent work! Your listening comprehension is outstanding.";
@@ -163,6 +211,27 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           <div className="space-y-6">
+            {/* Save Status */}
+            {isLoggedIn && (
+              <div className="mb-4">
+                {loading && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-blue-600 text-sm">Saving your score...</p>
+                  </div>
+                )}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-red-600 text-sm">Error saving score: {error}</p>
+                  </div>
+                )}
+                {scoreSaved && showSaveFeedback && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <p className="text-green-600 text-sm">Score saved successfully!</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Score Summary */}
             <div className="text-center">
               <div className="flex items-center justify-center gap-3 mb-4">
@@ -276,7 +345,8 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={onPlayAgain}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+              disabled={loading}
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 disabled:from-gray-400 disabled:to-gray-500 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg disabled:cursor-not-allowed"
             >
               <Play size={20} />
               Play Again
@@ -284,7 +354,8 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
             
             <button
               onClick={onGoHome}
-              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-md border-2 border-gray-200"
+              disabled={loading}
+              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-md border-2 border-gray-200 disabled:cursor-not-allowed"
             >
               <Home size={20} />
               Back to Main Menu

@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, Pause, RotateCcw, Check, Volume2, HelpCircle, SkipBack, BarChart3, Timer, Lock } from 'lucide-react';
-import { getRandomVideo, getExerciseByVideoId, validateExercises } from '../data/listeningData';
-import { VideoData, ListeningExercise } from '../types';
-import { calculateListeningScore, saveListeningScore } from '../utils/scoreUtils';
+import { ArrowLeft, BarChart3, Check, HelpCircle, Play, RotateCcw, SkipBack, Timer } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { getExerciseByVideoId, getRandomVideo, validateExercises } from '../data/listeningData';
+import { ListeningExercise, VideoData } from '../types';
+import { calculateListeningScore } from '../utils/scoreUtils';
 import ConfirmationModal from './ConfirmationModal';
-import ListeningResultsModal from './ListeningResultsModal';
+import CustomYouTubePlayer from './CustomYouTubePlayer';
 import ListeningInstructionsModal from './ListeningInstructionsModal';
 import ListeningLeaderboardModal from './ListeningLeaderboardModal';
-import CustomYouTubePlayer from './CustomYouTubePlayer';
+import ListeningResultsModal from './ListeningResultsModal';
 
 interface ListeningGameProps {
   onHome: () => void;
@@ -236,20 +236,6 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
     );
 
     setScore(finalScore);
-
-    // Save score to leaderboard
-    saveListeningScore({
-      playerName,
-      score: finalScore,
-      maxScore: 100,
-      percentage: Math.round((correctAnswers / totalBlanks) * 100),
-      correctAnswers,
-      totalBlanks,
-      videoTitle: currentVideo?.title || '',
-      difficulty: currentVideo?.difficulty || 'beginner',
-      timeSpent
-    });
-
     setGameEnded(true);
     setShowResults(true);
   };
