@@ -168,7 +168,7 @@ export const useScoreService = () => {
     setError(null);
     try {
       let leaderboard;
-      if (difficulty === "All") {
+      if (difficulty === "all") {
         leaderboard = await ScoreService.getGrammarLeaderboard(limit);
       } else {
         leaderboard = await ScoreService.getGrammarLeaderboardByDifficulty(difficulty, limit);

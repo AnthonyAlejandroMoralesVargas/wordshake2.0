@@ -20,7 +20,7 @@ const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ onBac
   }, [filterDifficulty]);
 
   const loadScores = async () => {
-    const apiScores = await getGrammarLeaderboard(filterDifficulty, 50);
+    const apiScores = await getGrammarLeaderboard(filterDifficulty.toLowerCase(), 50);
     // Mapea los datos de la API al tipo GrammarScore si es necesario
     const mappedScores: GrammarScore[] = (apiScores || []).map((score: any, idx: number) => ({
       id: score.idMatch?.toString() || idx.toString(),
