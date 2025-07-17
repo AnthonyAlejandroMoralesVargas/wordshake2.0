@@ -70,27 +70,27 @@ const ListeningHome: React.FC<ListeningHomeProps> = ({
                   <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Volume2 size={32} className="text-green-600" />
                   </div>
-                  <h3 className="font-semibold text-gray-800">Listen Carefully</h3>
+                  <h2 className="font-semibold text-gray-800">Listen Carefully</h2>
                   <p className="text-sm text-gray-600">Pay attention to pronunciation</p>
                 </div>
                 <div className="text-center">
                   <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <BookOpen size={32} className="text-blue-600" />
                   </div>
-                  <h3 className="font-semibold text-gray-800">Fill the Blanks</h3>
+                  <h2 className="font-semibold text-gray-800">Fill the Blanks</h2>
                   <p className="text-sm text-gray-600">Complete the paragraph</p>
                 </div>
                 <div className="text-center">
                   <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Trophy size={32} className="text-purple-600" />
                   </div>
-                  <h3 className="font-semibold text-gray-800">Earn Points</h3>
+                  <h2 className="font-semibold text-gray-800">Earn Points</h2>
                   <p className="text-sm text-gray-600">Score based on accuracy</p>
                 </div>
               </div>
 
               <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-lg p-6 text-white">
-                <h3 className="text-xl font-bold mb-2">How to Play</h3>
+                <h2 className="text-xl font-bold mb-2">How to Play</h2>
                 <ul className="text-left space-y-2 text-sm">
                   <li>• Choose your challenge level (Basic, Intermediate, Advanced)</li>
                   <li>• Basic: No time limit, unlimited video playback, hints and skip available</li>
