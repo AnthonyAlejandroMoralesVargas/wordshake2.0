@@ -60,6 +60,12 @@ body {
   100% { transform: scale(1); opacity: 1; }
 }
 
+@keyframes shake {
+  0%, 20%, 50%, 80%, 100% { transform: translateX(0); }
+  10%, 30%, 70%, 90% { transform: translateX(-5px); }
+  40%, 60% { transform: translateX(5px); }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.6s ease-out;
 }
@@ -104,4 +110,457 @@ body {
 .word-invalid {
   animation: shake 0.5s ease-in-out;
   background: linear-gradient(45deg, #f44336, #FF5722);
+}
+
+/* ===== SISTEMA DE DISEÑO OPTIMIZADO ===== */
+
+/* 1. ACCESIBILIDAD BASE */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+*:focus { outline: none; }
+
+.focus-ring,
+button:focus-visible,
+[tabindex]:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid;
+  outline-offset: 2px;
+  z-index: 10;
+  position: relative;
+}
+
+.focus-blue, .focus\:ring-blue-300:focus { outline-color: #3B82F6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); }
+.focus-green, .focus\:ring-green-300:focus { outline-color: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.3); }
+.focus-purple, .focus\:ring-purple-300:focus { outline-color: #7C3AED; box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.3); }
+
+:root {
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-disabled: #6B7280;
+  --text-error: #991B1B;
+  --text-success: #065F46;
+  
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F9FAFB;
+  --bg-disabled: #F3F4F6;
+  --bg-error: #FEF2F2;
+  
+  --border-primary: #9CA3AF;
+  --border-focus: #3B82F6;
+  --border-error: #F87171;
+  
+  --blue-primary: #2563EB;
+  --blue-hover: #1D4ED8;
+  --green-primary: #059669;
+  --green-hover: #047857;
+}
+
+.text-contrast { color: var(--text-primary); font-weight: 600; }
+.text-contrast-medium { color: var(--text-secondary); font-weight: 500; }
+.text-contrast-error { color: var(--text-error); font-weight: 600; }
+
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.modal-content {
+  background-color: var(--bg-primary);
+  border-radius: 1rem;
+  max-width: 28rem;
+  width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  color: var(--text-primary);
+}
+
+/* Inputs unificados */
+.input-base {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--border-primary);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  transition: all 0.15s ease-in-out;
+}
+
+.input-base:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-base:disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-primary);
+  cursor: not-allowed;
+}
+
+.input-base::placeholder {
+  color: var(--text-disabled);
+  opacity: 1;
+}
+
+/* Inputs con variantes de color */
+.input-green:focus {
+  border-color: var(--green-primary);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+/* Labels unificados */
+.label-base {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Botones unificados */
+.btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-base:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Variantes de botones */
+.btn-primary-blue {
+  background-color: var(--blue-primary);
+  color: #FFFFFF;
+  border-color: var(--blue-primary);
+}
+
+.btn-primary-blue:hover:not(:disabled) {
+  background-color: var(--blue-hover);
+  border-color: var(--blue-hover);
+}
+
+.btn-primary-green {
+  background-color: var(--green-primary);
+  color: #FFFFFF;
+  border-color: var(--green-primary);
+}
+
+.btn-primary-green:hover:not(:disabled) {
+  background-color: var(--green-hover);
+  border-color: var(--green-hover);
+}
+
+/* Links/botones de texto */
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: all 0.15s ease-in-out;
+  text-decoration: underline;
+}
+
+.btn-link-blue {
+  color: var(--blue-hover);
+}
+
+.btn-link-blue:hover:not(:disabled) {
+  color: #1E40AF;
+}
+
+.btn-link-green {
+  color: var(--green-hover);
+}
+
+.btn-link-green:hover:not(:disabled) {
+  color: #065F46;
+}
+
+/* Botón de cerrar */
+.btn-close {
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  border-radius: 0.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-close:hover {
+  background-color: var(--bg-disabled);
+}
+
+/* Iconos */
+.icon-primary-blue { color: var(--blue-primary); }
+.icon-primary-green { color: var(--green-primary); }
+.icon-neutral { color: var(--text-secondary); }
+
+/* Alertas y errores */
+.alert-error {
+  background-color: var(--bg-error);
+  border: 2px solid var(--border-error);
+  color: var(--text-error);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.alert-error ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.alert-error li {
+  font-weight: 500;
+}
+
+.alert-error li:before {
+  content: "• ";
+  font-weight: bold;
+}
+
+/* Utilidades de posicionamiento y espaciado */
+.relative-pos { position: relative; }
+.absolute-pos { position: absolute; }
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon .input-base {
+  padding-right: 2.5rem;
+}
+
+.input-icon {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.25rem;
+  color: var(--text-secondary);
+  border-radius: 0.25rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.input-icon:hover:not(:disabled) {
+  color: var(--text-primary);
+}
+
+.input-icon:disabled {
+  cursor: not-allowed;
+  color: var(--text-disabled);
+}
+
+/* 5. RESPONSIVE Y PREFERENCIAS DE USUARIO */
+@media (prefers-contrast: high) {
+  :root {
+    --text-primary: #000000;
+    --text-secondary: #000000;
+    --bg-primary: #FFFFFF;
+    --border-primary: #000000;
+  }
+  
+  .btn-base {
+    border-width: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 6. CLASES DE COMPATIBILIDAD (para componentes existentes) */
+.modal-label {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--border-primary);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  transition: all 0.15s ease-in-out;
+}
+
+.modal-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.modal-input:disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-primary);
+  cursor: not-allowed;
+}
+
+.modal-input::placeholder {
+  color: var(--text-disabled);
+  opacity: 1;
+}
+
+.modal-button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  background-color: var(--blue-primary);
+  color: #FFFFFF;
+  border-color: var(--blue-primary);
+}
+
+.modal-button-primary:hover:not(:disabled) {
+  background-color: var(--blue-hover);
+  border-color: var(--blue-hover);
+}
+
+.modal-button-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.modal-button-primary-green {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  background-color: var(--green-primary);
+  color: #FFFFFF;
+  border-color: var(--green-primary);
+}
+
+.modal-button-primary-green:hover:not(:disabled) {
+  background-color: var(--green-hover);
+  border-color: var(--green-hover);
+}
+
+.modal-button-primary-green:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.modal-link {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: all 0.15s ease-in-out;
+  text-decoration: underline;
+  color: var(--blue-hover);
+}
+
+.modal-link:hover:not(:disabled) {
+  color: #1E40AF;
+}
+
+.modal-link-green {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: all 0.15s ease-in-out;
+  text-decoration: underline;
+  color: var(--green-hover);
+}
+
+.modal-link-green:hover:not(:disabled) {
+  color: #065F46;
+}
+
+.modal-icon {
+  color: var(--text-secondary);
+}
+
+.modal-icon-primary {
+  color: var(--blue-primary);
+}
+
+.modal-icon-primary-green {
+  color: var(--green-primary);
+}
+
+.text-high-contrast {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.error-message {
+  background-color: var(--bg-error);
+  border: 2px solid var(--border-error);
+  color: var(--text-error);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
 }
