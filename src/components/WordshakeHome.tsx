@@ -70,27 +70,27 @@ const WordshakeHome: React.FC<WordshakeHomeProps> = ({
                   <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Book size={32} className="text-blue-600" />
                   </div>
-                  <h3 className="font-semibold text-gray-800">Build Words</h3>
+                  <h2 className="font-semibold text-gray-800">Build Words</h2>
                   <p className="text-sm text-gray-600">Create words from letters</p>
                 </div>
                 <div className="text-center">
                   <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Trophy size={32} className="text-purple-600" />
                   </div>
-                  <h3 className="font-semibold text-gray-800">Earn Stars</h3>
+                  <h2 className="font-semibold text-gray-800">Earn Stars</h2>
                   <p className="text-sm text-gray-600">Score based on word length</p>
                 </div>
                 <div className="text-center">
                   <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Play size={32} className="text-green-600" />
                   </div>
-                  <h3 className="font-semibold text-gray-800">Beat the Clock</h3>
+                  <h2 className="font-semibold text-gray-800">Beat the Clock</h2>
                   <p className="text-sm text-gray-600">Race against time</p>
                 </div>
               </div>
 
               <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
-                <h3 className="text-xl font-bold mb-2">How to Play</h3>
+                <h2 className="text-xl font-bold mb-2">How to Play</h2>
                 <ul className="text-left space-y-2 text-sm">
                   <li>• Choose your difficulty level (Basic, Intermediate, Advanced)</li>
                   <li>• Basic: 3-minute time limit, simple themes, unlimited shuffles</li>

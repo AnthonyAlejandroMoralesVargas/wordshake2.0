@@ -20,11 +20,32 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('All');
 
+  // Manejo de escape y focus para accesibilidad
   useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
     if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Prevenir scroll del body cuando el modal está abierto
+      document.body.style.overflow = 'hidden';
+      
+      // Enfocar el modal cuando se abre
+      const modal = document.getElementById('vocabulary-leaderboard-modal');
+      if (modal) {
+        modal.focus();
+      }
+      
       loadScores();
     }
-    // eslint-disable-next-line
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen, difficultyFilter]);
 
   const loadScores = async () => {
@@ -107,178 +128,273 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="leaderboard-modal-title"
+      aria-describedby="leaderboard-modal-description"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div 
+        id="vocabulary-leaderboard-modal"
+        className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
+      >
+        {/* Header con mejor contraste y estructura semántica */}
+        <header className="bg-gradient-to-r from-blue-600 to-purple-700 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Trophy size={32} />
+              <Trophy size={32} aria-hidden="true" className="text-yellow-200" />
               <div>
-                <h2 className="text-2xl font-bold">Vocabulary Challenge Leaderboard</h2>
-                <p className="text-blue-100">Top word-building champions</p>
+                <h1 id="leaderboard-modal-title" className="text-2xl font-bold text-white">
+                  Vocabulary Challenge Leaderboard
+                </h1>
+                <p id="leaderboard-modal-description" className="text-blue-100 font-medium">
+                  Top word-building champions and their achievements
+                </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="text-white hover:text-blue-100 transition-colors"
+              className="text-white hover:text-blue-200 transition-colors p-2 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300"
+              aria-label="Cerrar tabla de clasificación"
+              tabIndex={0}
             >
-              <X size={24} />
+              <X size={24} aria-hidden="true" />
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* Filters */}
-        <div className="bg-gray-50 px-6 py-4 border-b">
+        {/* Filters con mejor accesibilidad */}
+        <section className="bg-gray-100 border-t-2 border-gray-300 px-6 py-4 border-b" aria-labelledby="filters-section">
+          <h2 id="filters-section" className="sr-only">Filtros y opciones de clasificación</h2>
           <div className="flex flex-wrap gap-4 items-center">
             <div className="flex items-center gap-2">
-              <Filter size={20} className="text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">Filters:</span>
+              <Filter size={20} className="text-gray-700" aria-hidden="true" />
+              <span className="text-sm font-bold text-gray-800">Filters:</span>
             </div>
+            <label htmlFor="difficulty-filter" className="sr-only">
+              Filtrar por dificultad
+            </label>
             <select
+              id="difficulty-filter"
               value={difficultyFilter}
               onChange={(e) => setDifficultyFilter(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border-2 border-gray-400 rounded-lg text-sm font-medium focus:outline-none focus:ring-4 focus:ring-blue-300 focus:border-blue-600"
+              aria-label="Seleccionar nivel de dificultad para filtrar resultados"
+              tabIndex={0}
             >
               {DIFFICULTIES.map(d => (
-                <option key={d} value={d}>{d}</option>
+                <option key={d} value={d}>{d === 'All' ? 'All Difficulties' : d}</option>
               ))}
             </select>
-            <div className="text-sm text-gray-600">
-              {sortedScores.length} scores
+            <div className="text-sm text-gray-700 font-medium" role="status" aria-live="polite">
+              {loading ? 'Loading scores...' : `${sortedScores.length} scores found`}
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-200px)]">
+        {/* Content con mejor estructura y accesibilidad */}
+        <main className="overflow-y-auto max-h-[calc(90vh-200px)]" role="main">
           {loading ? (
-            <div className="p-8 text-center">Loading...</div>
+            <div className="p-8 text-center" role="status" aria-live="polite">
+              <div className="text-lg font-medium text-gray-800">Loading leaderboard data...</div>
+              <p className="text-gray-600 mt-2">Please wait while we fetch the latest scores</p>
+            </div>
           ) : sortedScores.length === 0 ? (
             <div className="p-8 text-center">
-              <Trophy size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">No scores found</h3>
-              <p className="text-gray-500">Try adjusting your filters or play a game to see scores here!</p>
+              <Trophy size={48} className="mx-auto text-gray-400 mb-4" aria-hidden="true" />
+              <h2 className="text-lg font-bold text-gray-700 mb-2">No scores found</h2>
+              <p className="text-gray-600 font-medium">Try adjusting your filters or play a game to see scores here!</p>
             </div>
           ) : (
             <div className="p-6">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Rank</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Player</th>
-                    <th 
-                      className="text-left py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('score')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Score
-                        {sortBy === 'score' && (
-                          sortOrder === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />
-                        )}
-                      </div>
-                    </th>
-                    <th 
-                      className="text-left py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('stars')}
-                    >
-                      <div className="flex items-center gap-1">
-                        <Star size={16} />
-                        Stars
-                        {sortBy === 'stars' && (
-                          sortOrder === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />
-                        )}
-                      </div>
-                    </th>
-                    <th 
-                      className="text-left py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('wordsFound')}
-                    >
-                      <div className="flex items-center gap-1">
-                        <Book size={16} />
-                        Words
-                        {sortBy === 'wordsFound' && (
-                          sortOrder === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />
-                        )}
-                      </div>
-                    </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Difficulty</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Time</th>
-                    <th 
-                      className="text-left py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('date')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Date
-                        {sortBy === 'date' && (
-                          sortOrder === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />
-                        )}
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedScores.map((score, index) => (
-                    <tr key={score.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4">
+              <div className="overflow-x-auto">
+                <table className="w-full" role="table" aria-label="Leaderboard rankings with player scores and statistics">
+                  <thead>
+                    <tr className="border-b-2 border-gray-300 bg-gray-50">
+                      <th className="text-left py-4 px-4 font-bold text-gray-800" scope="col">
+                        Rank
+                      </th>
+                      <th className="text-left py-4 px-4 font-bold text-gray-800" scope="col">
+                        Player Name
+                      </th>
+                      <th 
+                        className="text-left py-4 px-4 font-bold text-gray-800 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+                        onClick={() => handleSort('score')}
+                        scope="col"
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Sort by score ${sortBy === 'score' ? (sortOrder === 'asc' ? 'descending' : 'ascending') : 'descending'}`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleSort('score');
+                          }
+                        }}
+                      >
                         <div className="flex items-center gap-2">
-                          {index < 3 ? (
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                              index === 0 ? 'bg-yellow-500' : 
-                              index === 1 ? 'bg-gray-400' : 'bg-orange-500'
-                            }`}>
-                              {index + 1}
-                            </div>
-                          ) : (
-                            <span className="text-gray-500 font-medium">{index + 1}</span>
+                          Total Score
+                          {sortBy === 'score' && (
+                            sortOrder === 'asc' ? 
+                            <ArrowUp size={16} className="text-blue-600" aria-hidden="true" /> : 
+                            <ArrowDown size={16} className="text-blue-600" aria-hidden="true" />
                           )}
                         </div>
-                      </td>
-                      <td className="py-3 px-4 font-medium text-gray-800">{score.playerName}</td>
-                      <td className="py-3 px-4 font-bold text-blue-600">{score.score}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1">
-                          <Star size={16} className="text-yellow-500" />
-                          <span className="font-medium">{score.stars}</span>
+                      </th>
+                      <th 
+                        className="text-left py-4 px-4 font-bold text-gray-800 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+                        onClick={() => handleSort('stars')}
+                        scope="col"
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Sort by stars ${sortBy === 'stars' ? (sortOrder === 'asc' ? 'descending' : 'ascending') : 'descending'}`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleSort('stars');
+                          }
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Star size={16} className="text-yellow-600" aria-hidden="true" />
+                          Stars Earned
+                          {sortBy === 'stars' && (
+                            sortOrder === 'asc' ? 
+                            <ArrowUp size={16} className="text-blue-600" aria-hidden="true" /> : 
+                            <ArrowDown size={16} className="text-blue-600" aria-hidden="true" />
+                          )}
                         </div>
-                      </td>
-                      <td className="py-3 px-4 font-medium">{score.wordsFound}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyBadge(score.difficulty)}`}>
-                          {score.difficulty}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-1">
-                          <Clock size={14} />
-                          {formatTime(score.timeSpent)}
+                      </th>
+                      <th 
+                        className="text-left py-4 px-4 font-bold text-gray-800 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+                        onClick={() => handleSort('wordsFound')}
+                        scope="col"
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Sort by words found ${sortBy === 'wordsFound' ? (sortOrder === 'asc' ? 'descending' : 'ascending') : 'descending'}`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleSort('wordsFound');
+                          }
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Book size={16} className="text-green-600" aria-hidden="true" />
+                          Words Found
+                          {sortBy === 'wordsFound' && (
+                            sortOrder === 'asc' ? 
+                            <ArrowUp size={16} className="text-blue-600" aria-hidden="true" /> : 
+                            <ArrowDown size={16} className="text-blue-600" aria-hidden="true" />
+                          )}
                         </div>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-600">
-                        {formatDate(score.date)}
-                      </td>
+                      </th>
+                      <th className="text-left py-4 px-4 font-bold text-gray-800" scope="col">
+                        Difficulty Level
+                      </th>
+                      <th className="text-left py-4 px-4 font-bold text-gray-800" scope="col">
+                        Time Spent
+                      </th>
+                      <th 
+                        className="text-left py-4 px-4 font-bold text-gray-800 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+                        onClick={() => handleSort('date')}
+                        scope="col"
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Sort by date ${sortBy === 'date' ? (sortOrder === 'asc' ? 'descending' : 'ascending') : 'descending'}`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleSort('date');
+                          }
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          Date Played
+                          {sortBy === 'date' && (
+                            sortOrder === 'asc' ? 
+                            <ArrowUp size={16} className="text-blue-600" aria-hidden="true" /> : 
+                            <ArrowDown size={16} className="text-blue-600" aria-hidden="true" />
+                          )}
+                        </div>
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {sortedScores.map((score, index) => (
+                      <tr key={score.id} className="border-b-2 border-gray-200 hover:bg-blue-50 transition-colors">
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-2">
+                            {index < 3 ? (
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-lg border-2 ${
+                                index === 0 ? 'bg-yellow-500 border-yellow-600' : 
+                                index === 1 ? 'bg-gray-500 border-gray-600' : 'bg-orange-500 border-orange-600'
+                              }`} aria-label={`${index === 0 ? 'First' : index === 1 ? 'Second' : 'Third'} place`}>
+                                {index + 1}
+                              </div>
+                            ) : (
+                              <span className="text-gray-700 font-bold text-lg w-8 text-center" aria-label={`Rank ${index + 1}`}>
+                                {index + 1}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 font-bold text-gray-900 text-lg">{score.playerName}</td>
+                        <td className="py-4 px-4 font-bold text-blue-700 text-xl">{score.score}</td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-2">
+                            <Star size={18} className="text-yellow-600 fill-current" aria-hidden="true" />
+                            <span className="font-bold text-gray-800 text-lg">{score.stars}</span>
+                            <span className="sr-only">stars earned</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 font-bold text-gray-800 text-lg">{score.wordsFound}</td>
+                        <td className="py-4 px-4">
+                          <span className={`px-3 py-2 rounded-lg text-sm font-bold border-2 ${getDifficultyBadge(score.difficulty)}`}>
+                            {score.difficulty}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4 text-gray-700 font-medium">
+                          <div className="flex items-center gap-2">
+                            <Clock size={16} className="text-blue-600" aria-hidden="true" />
+                            <span>{formatTime(score.timeSpent)}</span>
+                            <span className="sr-only">minutes and seconds</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-gray-700 font-medium">
+                          {formatDate(score.date)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
-        </div>
+        </main>
 
         {/* Footer */}
-        <div className="bg-gray-50 px-6 py-4 border-t">
+        <footer className="bg-gray-50 px-6 py-4 border-t border-gray-200">
           <div className="flex justify-between items-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-700 font-medium" role="status" aria-live="polite">
               Showing top vocabulary challenge scores
             </p>
             <button
               onClick={onClose}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-bold focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-offset-2"
+              aria-label="Close vocabulary leaderboard modal"
             >
               Close
             </button>
           </div>
-        </div>
+        </footer>
       </div>
     </div>
   );
