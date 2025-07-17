@@ -1,5 +1,5 @@
 import { Eye, EyeOff, UserPlus, X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { validateRegistration } from '../utils/authUtils';
 
@@ -20,26 +20,6 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Manejo de tecla Escape para cerrar modal
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isSubmitting) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      // Prevenir scroll del body cuando el modal está abierto
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, isSubmitting, onClose]);
 
   if (!isOpen) return null;
 
@@ -108,47 +88,22 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
   };
 
   return (
-    <div 
-      className="modal-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="register-modal-title"
-      aria-describedby="register-modal-description"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !isSubmitting) {
-          onClose();
-        }
-      }}
-    >
-      <div className="modal-content max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <header className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
-              <UserPlus size={28} className="icon-primary-green" aria-hidden="true" />
-              <h1 id="register-modal-title" className="text-2xl font-bold text-contrast">Create Account</h1>
+              <UserPlus size={28} className="text-green-500" />
+              <h2 className="text-2xl font-bold text-gray-800">Create Account</h2>
             </div>
-            <button 
-              onClick={onClose} 
-              className="btn-close focus-green"
-              aria-label="Cerrar modal de registro"
-              tabIndex={0}
-            >
-              <X size={24} className="modal-icon" aria-hidden="true" />
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <X size={24} className="text-gray-600" />
             </button>
-          </header>
-
-          <p id="register-modal-description" className="sr-only">
-            Formulario para crear una nueva cuenta con nombre, apellido, email y contraseña
-          </p>
+          </div>
 
           {errors.length > 0 && (
-            <div 
-              id="register-errors"
-              className="alert-error"
-              role="alert"
-              aria-live="polite"
-            >
-              <ul className="text-sm space-y-1" role="list">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <ul className="text-red-600 text-sm space-y-1">
                 {errors.map((error, index) => (
                   <li key={index}>• {error}</li>
                 ))}
@@ -156,170 +111,105 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSwitch
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            <div className="form-grid-2">
-              <div>
-                <label htmlFor="first-name-input" className="label-base">
-                  First Name
-                </label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <label className="block text-gray-700 mb-1">First Name</label>
                 <input
-                  id="first-name-input"
                   type="text"
-                  className="input-base input-green focus-green"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
                   value={firstName}
                   onChange={e => setFirstName(e.target.value)}
                   required
                   disabled={isSubmitting}
-                  aria-required="true"
-                  aria-invalid={errors.length > 0 ? 'true' : 'false'}
-                  aria-describedby={errors.length > 0 ? 'register-errors' : undefined}
-                  placeholder="Enter your first name"
-                  autoComplete="given-name"
-                  tabIndex={0}
                 />
               </div>
-              <div>
-                <label htmlFor="last-name-input" className="label-base">
-                  Last Name
-                </label>
+              <div className="flex-1">
+                <label className="block text-gray-700 mb-1">Last Name</label>
                 <input
-                  id="last-name-input"
                   type="text"
-                  className="input-base input-green focus-green"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
                   value={lastName}
                   onChange={e => setLastName(e.target.value)}
                   required
                   disabled={isSubmitting}
-                  aria-required="true"
-                  aria-invalid={errors.length > 0 ? 'true' : 'false'}
-                  aria-describedby={errors.length > 0 ? 'register-errors' : undefined}
-                  placeholder="Enter your last name"
-                  autoComplete="family-name"
-                  tabIndex={0}
                 />
               </div>
             </div>
             <div>
-              <label htmlFor="email-input-register" className="label-base">
-                Email Address
-              </label>
+              <label className="block text-gray-700 mb-1">Email Address</label>
               <input
-                id="email-input-register"
                 type="email"
-                className="input-base input-green focus-green"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
                 disabled={isSubmitting}
-                aria-required="true"
-                aria-invalid={errors.length > 0 ? 'true' : 'false'}
-                aria-describedby={errors.length > 0 ? 'register-errors' : undefined}
-                placeholder="Enter your email address"
-                autoComplete="email"
-                tabIndex={0}
               />
             </div>
             <div>
-              <label htmlFor="password-input-register" className="label-base">
-                Password
-              </label>
-              <div className="input-with-icon">
+              <label className="block text-gray-700 mb-1">Password</label>
+              <div className="relative">
                 <input
-                  id="password-input-register"
                   type={showPassword ? "text" : "password"}
-                  className="input-base input-green focus-green"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 pr-10 disabled:bg-gray-50"
                   value={password}
                   onChange={handlePasswordChange}
                   required
                   disabled={isSubmitting}
-                  aria-required="true"
-                  aria-invalid={errors.length > 0 ? 'true' : 'false'}
-                  aria-describedby="password-requirements password-visibility-toggle-register"
-                  placeholder="Enter your password"
-                  autoComplete="new-password"
-                  tabIndex={0}
                 />
                 <button
-                  id="password-visibility-toggle-register"
                   type="button"
-                  className="input-icon focus-green"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isSubmitting}
-                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                  tabIndex={0}
                 >
-                  {showPassword ? 
-                    <EyeOff size={20} aria-hidden="true" /> : 
-                    <Eye size={20} aria-hidden="true" />
-                  }
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              <p id="password-requirements" className="text-help">
+              <p className="text-xs text-gray-500 mt-1">
                 Minimum 8 characters, one number and one special character
               </p>
             </div>
             <div>
-              <label htmlFor="confirm-password-input" className="label-base">
-                Confirm Password
-              </label>
-              <div className="input-with-icon">
+              <label className="block text-gray-700 mb-1">Confirm Password</label>
+              <div className="relative">
                 <input
-                  id="confirm-password-input"
                   type={showConfirmPassword ? "text" : "password"}
-                  className="input-base input-green focus-green"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 pr-10 disabled:bg-gray-50"
                   value={confirmPassword}
                   onChange={handleConfirmPasswordChange}
                   required
                   disabled={isSubmitting}
-                  aria-required="true"
-                  aria-invalid={errors.length > 0 ? 'true' : 'false'}
-                  aria-describedby="confirm-password-visibility-toggle"
-                  placeholder="Confirm your password"
-                  autoComplete="new-password"
-                  tabIndex={0}
                 />
                 <button
-                  id="confirm-password-visibility-toggle"
                   type="button"
-                  className="input-icon focus-green"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   disabled={isSubmitting}
-                  aria-label={showConfirmPassword ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
-                  tabIndex={0}
                 >
-                  {showConfirmPassword ? 
-                    <EyeOff size={20} aria-hidden="true" /> : 
-                    <Eye size={20} aria-hidden="true" />
-                  }
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary-green w-full mt-2 focus-green"
-              aria-describedby="submit-status-register"
-              tabIndex={0}
+              className="w-full bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors mt-2 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Creating Account...' : 'Create Account'}
             </button>
-            <div id="submit-status-register" className="sr-only">
-              {isSubmitting ? 'Creando cuenta, por favor espere' : 'Formulario listo para enviar'}
-            </div>
           </form>
-
-          <footer className="text-center mt-4">
+          <div className="text-center mt-4">
             <button
               type="button"
               onClick={onSwitch}
-              className="btn-link-green focus-green"
+              className="text-green-500 hover:underline font-semibold disabled:cursor-not-allowed"
               disabled={isSubmitting}
-              aria-label="Cambiar a formulario de inicio de sesión"
-              tabIndex={0}
             >
               Already have an account? Login here
             </button>
-          </footer>
+          </div>
         </div>
       </div>
     </div>
