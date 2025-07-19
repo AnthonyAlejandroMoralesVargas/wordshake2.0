@@ -3,18 +3,20 @@ import { useScoreService } from '../hooks/useScoreService';
 import { GrammarScore } from '../types';
 
 interface GrammarLeaderboardModalProps {
-  onBack: () => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const DIFFICULTIES = ["All", "Beginner", "Intermediate", "Advanced"];
 
-const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ onBack }) => {
+const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ isOpen, onClose }) => {
   const { getGrammarLeaderboard, loading } = useScoreService();
   const [scores, setScores] = useState<GrammarScore[]>([]);
   const [filterDifficulty, setFilterDifficulty] = useState<string>('All');
   const [sortBy, setSortBy] = useState<'time' | 'date'>('time');
 
   const loadScores = useCallback(async () => {
+    if (!isOpen) return;
     const apiScores = await getGrammarLeaderboard(filterDifficulty.toLowerCase(), 50);
     // Mapea los datos de la API al tipo GrammarScore si es necesario
     const mappedScores: GrammarScore[] = (apiScores || []).map((score: any, idx: number) => ({
@@ -30,7 +32,7 @@ const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ onBac
       totalSentences: score.totalSentences || 0, // Ajusta si tu API retorna esto
     }));
     setScores(mappedScores);
-  }, [getGrammarLeaderboard, filterDifficulty]);
+  }, [getGrammarLeaderboard, filterDifficulty, isOpen]);
 
   useEffect(() => {
     loadScores();
@@ -74,6 +76,8 @@ const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ onBac
     });
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
@@ -85,10 +89,10 @@ const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ onBac
               <p className="text-gray-600">Best completion times</p>
             </div>
             <button
-              onClick={onBack}
+              onClick={onClose}
               className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
             >
-              Back
+              Close
             </button>
           </div>
 
@@ -107,19 +111,6 @@ const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ onBac
                   {DIFFICULTIES.map(d => (
                     <option key={d} value={d}>{d}</option>
                   ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sort by:
-                </label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as 'time' | 'date')}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="time">Best Time</option>
-                  <option value="date">Most Recent</option>
                 </select>
               </div>
             </div>

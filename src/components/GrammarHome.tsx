@@ -16,14 +16,6 @@ const GrammarHome: React.FC<GrammarHomeProps> = ({ onBack, onStartGame }) => {
     onStartGame(difficulty);
   };
 
-  if (showLeaderboard) {
-    return (
-      <GrammarLeaderboardModal
-        onBack={() => setShowLeaderboard(false)}
-      />
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-4xl mx-auto">
@@ -203,6 +195,14 @@ const GrammarHome: React.FC<GrammarHomeProps> = ({ onBack, onStartGame }) => {
           isOpen={showDifficultyModal}
           onClose={() => setShowDifficultyModal(false)}
           onSelectDifficulty={handleDifficultySelect}
+        />
+      )}
+
+      {/* Grammar Leaderboard Modal */}
+      {showLeaderboard && (
+        <GrammarLeaderboardModal
+          isOpen={showLeaderboard}
+          onClose={() => setShowLeaderboard(false)}
         />
       )}
     </div>
