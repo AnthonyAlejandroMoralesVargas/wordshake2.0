@@ -51,10 +51,6 @@ const ListeningHome: React.FC<ListeningHomeProps> = ({
               <ArrowLeft size={20} />
               Back to Games
             </button>
-            <div className="flex items-center gap-2 bg-white bg-opacity-80 px-4 py-2 rounded-lg shadow-md">
-              <Volume2 size={24} className="text-green-600" />
-              <span className="text-lg font-bold text-gray-800">Listening Challenge</span>
-            </div>
           </div>
 
           {/* Main Content */}
