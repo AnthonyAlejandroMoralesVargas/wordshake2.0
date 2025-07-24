@@ -52,10 +52,6 @@ const WordshakeHome: React.FC<WordshakeHomeProps> = ({
               <ArrowLeft size={20} aria-hidden="true" />
               Back to Games
             </button>
-            <div className="flex items-center gap-2 bg-white bg-opacity-80 px-4 py-2 rounded-lg shadow-md">
-              <Book size={24} className="text-blue-600" aria-hidden="true" />
-              <span className="text-lg font-bold text-gray-800">Vocabulary Challenge</span>
-            </div>
           </header>
 
           {/* Main Content */}
