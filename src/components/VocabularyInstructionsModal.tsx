@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Book, Star, Clock, Shuffle, Check, RotateCcw } from 'lucide-react';
 import { gameInstructions } from '../data/instructions';
 
@@ -11,6 +11,23 @@ const VocabularyInstructionsModal: React.FC<VocabularyInstructionsModalProps> = 
   isOpen,
   onClose
 }) => {
+  // Handle ESC key press to close modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (

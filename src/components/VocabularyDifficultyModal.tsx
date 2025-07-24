@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Star, Target, Zap, BookOpen, Clock, Users, Play, Timer, Lock } from 'lucide-react';
 
 interface VocabularyDifficultyModalProps {
@@ -12,6 +12,23 @@ const VocabularyDifficultyModal: React.FC<VocabularyDifficultyModalProps> = ({
   onClose,
   onSelectDifficulty
 }) => {
+  // Handle ESC key press to close modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const difficulties = [
@@ -84,6 +101,8 @@ const VocabularyDifficultyModal: React.FC<VocabularyDifficultyModalProps> = ({
             <button
               onClick={onClose}
               className="text-white hover:text-blue-100 transition-colors"
+              aria-label="Close difficulty selection modal"
+              title="Close"
             >
               <X size={24} />
             </button>

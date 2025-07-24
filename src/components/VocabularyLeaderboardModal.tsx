@@ -20,6 +20,23 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('All');
 
+  // Handle ESC key press to close modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isOpen, onClose]);
+
   useEffect(() => {
     if (isOpen) {
       loadScores();
@@ -122,6 +139,8 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
             <button
               onClick={onClose}
               className="text-white hover:text-blue-100 transition-colors"
+              aria-label="Close leaderboard modal"
+              title="Close"
             >
               <X size={24} />
             </button>

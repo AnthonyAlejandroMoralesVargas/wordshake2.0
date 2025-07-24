@@ -400,10 +400,10 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
           </div>
         )}
 
-        <div className="space-y-6">
+        <main className="space-y-6">
           {/* Current Word above the grid */}
-          <div className="bg-white rounded-lg p-6 shadow-md">
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">Current Word</h3>
+          <section className="bg-white rounded-lg p-6 shadow-md">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Current Word</h2>
             <WordDisplayWithActions
               currentWord={currentWord}
               onShuffle={handleShuffle}
@@ -436,16 +436,16 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
                   (difficulty === 'intermediate' && hintsUsed >= 5) ||
                   foundWords.length >= currentTheme.words.length
                 }
-                className="mt-2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="mt-2 px-4 py-2 bg-yellow-700 text-white rounded hover:bg-yellow-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {difficulty === 'beginner' ? 'Hint (Unlimited)' : `Hint (${5 - hintsUsed} left)`}
               </button>
             )}
-          </div>
+          </section>
 
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Letter Grid - Takes 2/3 of the screen */}
-            <div className="lg:col-span-2">
+            <section className="lg:col-span-2">
               <div className="bg-white rounded-lg p-6 shadow-md">
                 <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Letter Grid</h2>
                 <LetterGrid
@@ -458,17 +458,17 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
                   currentHintIndex={currentHintIndex}
                 />
               </div>
-            </div>
+            </section>
 
             {/* Sidebar - Takes 1/3 of the screen */}
-            <div className="space-y-6">
+            <aside className="space-y-6">
               <FoundWordsList foundWords={foundWords} />
               
               <div className="bg-white rounded-lg p-6 shadow-md">
                 <h3 className="text-lg font-semibold mb-4 text-gray-800">Game Stats</h3>
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div className="bg-yellow-50 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-yellow-600">{score}</div>
+                    <div className="text-2xl font-bold text-yellow-800">{score}</div>
                     <div className="text-gray-600">Total Stars</div>
                   </div>
                   <div className="bg-blue-50 rounded-lg p-4">
@@ -494,9 +494,9 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
                   </div>
                 </div>
               </div>
-            </div>
+            </aside>
           </div>
-        </div>
+        </main>
       </div>
 
       <VocabularyInstructionsModal
