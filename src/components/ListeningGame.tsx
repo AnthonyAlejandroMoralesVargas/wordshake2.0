@@ -29,6 +29,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
   const [showInstructions, setShowInstructions] = useState<boolean>(false);
   const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
   const [showResults, setShowResults] = useState<boolean>(false);
+  const [leaderboardFromResults, setLeaderboardFromResults] = useState<boolean>(false);
   const [gameStartTime, setGameStartTime] = useState<number>(0);
   const [gameEndTime, setGameEndTime] = useState<number>(0);
   const [hintsUsed, setHintsUsed] = useState<number>(0);
@@ -281,7 +282,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
       case 'advanced':
         return 'text-purple-600 bg-purple-100';
       default:
-        return 'text-gray-600 bg-gray-100';
+        return 'text-gray-800 bg-gray-100';
     }
   };
 
@@ -386,7 +387,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
                       disabled={getMaxHints() > 0 && getRemainingHints() === 0 && !showHints[blank.id]}
                       className={`transition-colors ${
                         getMaxHints() > 0 && getRemainingHints() === 0 && !showHints[blank.id]
-                          ? 'text-gray-400 cursor-not-allowed'
+                          ? 'text-gray-700 cursor-not-allowed'
                           : 'text-blue-500 hover:text-blue-700'
                       }`}
                       title={
@@ -410,7 +411,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
                   )}
                 </div>
                 {showHint && getMaxHints() !== 0 && (
-                  <div className="absolute mt-1 text-sm text-gray-600 bg-yellow-100 p-2 rounded shadow-md z-10 min-w-48">
+                  <div className="absolute mt-1 text-sm text-gray-800 bg-yellow-100 p-2 rounded shadow-md z-10 min-w-48">
                     <strong>Hint:</strong> {blank.hint}
                   </div>
                 )}
@@ -519,7 +520,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
               </div>
               <div className="mt-4">
                 <h3 className="font-semibold text-gray-800">{currentVideo.title}</h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-800">
                   Difficulty: {currentVideo.difficulty} | Duration: {currentVideo.duration}
                 </p>
               </div>
@@ -535,7 +536,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
               </div>
               
               <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-800">
                   {Object.keys(userAnswers).length} of {currentExercise.blanks.length} blanks filled
                   {getRemainingHints() > 0 && selectedDifficulty !== 'advanced' && (
                     <span className="ml-2 text-orange-600">
@@ -601,7 +602,15 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
         {/* Leaderboard Modal */}
         <ListeningLeaderboardModal
           isOpen={showLeaderboard}
-          onClose={() => setShowLeaderboard(false)}
+          onClose={() => {
+            setShowLeaderboard(false);
+            setLeaderboardFromResults(false);
+          }}
+          onBackToResults={leaderboardFromResults ? () => {
+            setShowLeaderboard(false);
+            setShowResults(true);
+            setLeaderboardFromResults(false);
+          } : undefined}
         />
 
         {/* Results Modal */}
@@ -611,6 +620,11 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
             onClose={() => setShowResults(false)}
             onPlayAgain={handlePlayAgain}
             onGoHome={handleGoHome}
+            onLeaderboard={() => {
+              setShowResults(false);
+              setLeaderboardFromResults(true);
+              setShowLeaderboard(true);
+            }}
             exercise={currentExercise}
             userAnswers={userAnswers}
             score={score}

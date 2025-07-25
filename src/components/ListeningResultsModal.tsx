@@ -1,4 +1,4 @@
-import { Award, Clock, Home, Medal, Play, Star, Target, Trophy, Volume2, X } from 'lucide-react';
+import { Award, Clock, Home, Medal, Play, RotateCcw, Star, Target, Trophy, Volume2, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useScoreService } from '../hooks/useScoreService';
@@ -10,6 +10,7 @@ interface ListeningResultsModalProps {
   onClose: () => void;
   onPlayAgain: () => void;
   onGoHome: () => void;
+  onLeaderboard: () => void;
   exercise: ListeningExercise;
   userAnswers: { [key: number]: string };
   score: number;
@@ -23,6 +24,7 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
   onClose,
   onPlayAgain,
   onGoHome,
+  onLeaderboard,
   exercise,
   userAnswers,
   score,
@@ -104,7 +106,7 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
 
   const getScoreIcon = () => {
     if (score >= 90) return <Trophy size={32} className="text-yellow-500" />;
-    if (score >= 80) return <Medal size={32} className="text-gray-400" />;
+    if (score >= 80) return <Medal size={32} className="text-gray-700" />;
     if (score >= 70) return <Award size={32} className="text-amber-600" />;
     return <Star size={32} className="text-orange-500" />;
   };
@@ -118,7 +120,7 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
       case 'advanced':
         return 'text-purple-600 bg-purple-100';
       default:
-        return 'text-gray-600 bg-gray-100';
+        return 'text-gray-800 bg-gray-100';
     }
   };
 
@@ -164,19 +166,19 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
             <div>
-              <span className="text-gray-600">Your answer:</span>
+              <span className="text-gray-800">Your answer:</span>
               <p className={`font-medium ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
                 {userAnswer || '(empty)'}
               </p>
             </div>
             
             <div>
-              <span className="text-gray-600">Correct answer:</span>
+              <span className="text-gray-800">Correct answer:</span>
               <p className="font-medium text-green-700">{blank.word}</p>
             </div>
             
             <div>
-              <span className="text-gray-600">Hint:</span>
+              <span className="text-gray-800">Hint:</span>
               <p className="text-gray-700">{blank.hint}</p>
             </div>
           </div>
@@ -199,9 +201,10 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
               </div>
             </div>
             <button
-              onClick={onPlayAgain}
+              onClick={onGoHome}
               className="text-white hover:text-green-100 transition-colors"
-              title="Play Again"
+              aria-label="Go to home"
+              title="Go to Home"
             >
               <X size={24} />
             </button>
@@ -239,10 +242,10 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
                 <div className={`text-6xl font-bold ${getScoreColor()}`}>
                   {score}
                 </div>
-                <span className="text-2xl text-gray-500">/100</span>
+                <span className="text-2xl text-gray-700">/100</span>
               </div>
               <p className="text-lg text-gray-700 mb-2">{getScoreMessage()}</p>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-800">
                 Accuracy: {accuracy}% ({correctAnswers}/{totalBlanks} correct)
               </div>
               <div className="mt-2">
@@ -253,7 +256,7 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
               </div>
               
               {/* Difficulty Restrictions Info */}
-              <div className="mt-3 text-xs text-gray-500">
+              <div className="mt-3 text-xs text-gray-700">
                 {difficulty === 'beginner' && (
                   <span>✓ No time limit • Unlimited video playback • Hints and skip available</span>
                 )}
@@ -337,29 +340,34 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
                 </ul>
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="bg-gray-50 px-6 py-4 border-t">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={onPlayAgain}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 disabled:from-gray-400 disabled:to-gray-500 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg disabled:cursor-not-allowed"
-            >
-              <Play size={20} />
-              Play Again
-            </button>
-            
-            <button
-              onClick={onGoHome}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-md border-2 border-gray-200 disabled:cursor-not-allowed"
-            >
-              <Home size={20} />
-              Back to Main Menu
-            </button>
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              <button
+                onClick={onPlayAgain}
+                disabled={loading}
+                className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+              >
+                <RotateCcw size={20} />
+                Play Again
+              </button>
+              <button
+                onClick={onLeaderboard}
+                disabled={loading}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+              >
+                <Trophy size={20} />
+                Leaderboard
+              </button>
+              <button
+                onClick={onGoHome}
+                disabled={loading}
+                className="flex-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+              >
+                <Home size={20} />
+                Home
+              </button>
+            </div>
           </div>
         </div>
       </div>

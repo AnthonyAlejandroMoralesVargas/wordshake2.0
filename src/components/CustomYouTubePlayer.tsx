@@ -401,7 +401,7 @@ const CustomYouTubePlayer: React.FC<CustomYouTubePlayerProps> = ({
               disabled={!isReady || disabled}
               className={`p-2 rounded-full transition-colors ${
                 !isReady || disabled
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
                   : 'bg-white/20 hover:bg-white/30 text-white'
               }`}
               style={{ pointerEvents: 'auto' }}
@@ -416,7 +416,7 @@ const CustomYouTubePlayer: React.FC<CustomYouTubePlayerProps> = ({
                 disabled={!isReady}
                 className={`p-2 rounded-full transition-colors ${
                   !isReady
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
                     : 'bg-white/20 hover:bg-white/30 text-white'
                 }`}
                 style={{ pointerEvents: 'auto' }}

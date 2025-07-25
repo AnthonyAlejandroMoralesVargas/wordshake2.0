@@ -39,6 +39,23 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
   const [scoreSaved, setScoreSaved] = useState(false);
   const [showSaveFeedback, setShowSaveFeedback] = useState(false);
 
+  // Handle ESC key press to close modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isOpen, onClose]);
+
   useEffect(() => {
     if (isOpen && isLoggedIn && user) {
       // Auto-save score when modal opens and user is logged in
@@ -59,7 +76,7 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
       case 'beginner': return 'text-green-600';
       case 'intermediate': return 'text-blue-600';
       case 'advanced': return 'text-red-600';
-      default: return 'text-gray-600';
+      default: return 'text-gray-800';
     }
   };
 
@@ -130,6 +147,8 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
             <button
               onClick={onClose}
               className="text-white hover:text-blue-100 transition-colors"
+              aria-label="Close results modal"
+              title="Close"
             >
               <X size={24} />
             </button>
@@ -141,7 +160,7 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
           {/* Score Summary */}
           <div className="text-center mb-6">
             <div className="text-4xl font-bold text-gray-800 mb-2">{score}</div>
-            <div className="text-lg text-gray-600 mb-4">Total Points</div>
+            <div className="text-lg text-gray-800 mb-4">Total Points</div>
             <p className="text-lg font-semibold text-blue-600">{getScoreMessage(score)}</p>
           </div>
 
@@ -178,30 +197,30 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-yellow-50 rounded-lg p-4 text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <Star size={20} className="text-yellow-600" />
-                <span className="text-2xl font-bold text-yellow-600">{stars}</span>
+                <Star size={20} className="text-yellow-800" />
+                <span className="text-2xl font-bold text-yellow-800">{stars}</span>
               </div>
-              <div className="text-gray-600">Stars Earned</div>
+              <div className="text-gray-800">Stars Earned</div>
             </div>
             <div className="bg-blue-50 rounded-lg p-4 text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Book size={20} className="text-blue-600" />
                 <span className="text-2xl font-bold text-blue-600">{wordsFound.length}</span>
               </div>
-              <div className="text-gray-600">Words Found</div>
+              <div className="text-gray-800">Words Found</div>
             </div>
             <div className="bg-green-50 rounded-lg p-4 text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Clock size={20} className="text-green-600" />
                 <span className="text-2xl font-bold text-green-600">{formatTime(timeSpent)}</span>
               </div>
-              <div className="text-gray-600">Time Spent</div>
+              <div className="text-gray-800">Time Spent</div>
             </div>
             <div className="bg-purple-50 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold text-purple-600 mb-2">
                 {Math.round((wordsFound.length / totalWords) * 100)}%
               </div>
-              <div className="text-gray-600">Completion</div>
+              <div className="text-gray-800">Completion</div>
             </div>
           </div>
 
@@ -210,21 +229,21 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
             <h3 className="font-semibold text-gray-800 mb-3">Game Details</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Theme:</span>
+                <span className="text-gray-800">Theme:</span>
                 <span className="font-medium text-gray-800">{theme}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Difficulty:</span>
+                <span className="text-gray-800">Difficulty:</span>
                 <span className={`font-medium px-2 py-1 rounded-full text-xs ${getDifficultyBadge(difficulty)}`}>
                   {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Total Possible Words:</span>
+                <span className="text-gray-800">Total Possible Words:</span>
                 <span className="font-medium text-gray-800">{totalWords}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Player:</span>
+                <span className="text-gray-800">Player:</span>
                 <span className="font-medium text-gray-800">
                   {isLoggedIn && user ? user.displayName : 'Anonymous Player'}
                 </span>
@@ -256,7 +275,7 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
             <button
               onClick={onRestart}
               disabled={loading}
-              className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
             >
               <RotateCcw size={20} />
               Play Again
@@ -264,7 +283,7 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
             <button
               onClick={onLeaderboard}
               disabled={loading}
-              className="flex-1 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+              className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
             >
               <Trophy size={20} />
               Leaderboard
@@ -272,7 +291,7 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
             <button
               onClick={onHome}
               disabled={loading}
-              className="flex-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+              className="flex-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
             >
               <Home size={20} />
               Home

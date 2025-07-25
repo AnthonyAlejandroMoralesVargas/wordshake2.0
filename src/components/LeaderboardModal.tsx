@@ -30,8 +30,9 @@ const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ isOpen, onClose, sc
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Close leaderboard"
             >
-              <X size={24} className="text-gray-600" />
+              <X size={24} className="text-gray-800" />
             </button>
           </div>
 
@@ -39,15 +40,15 @@ const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ isOpen, onClose, sc
             <table className="w-full text-left">
               <thead>
                 <tr>
-                  <th className="py-2 px-2 text-gray-700">#</th>
-                  <th className="py-2 px-2 text-gray-700">Nickname</th>
-                  <th className="py-2 px-2 text-gray-700">Score</th>
+                  <th className="py-2 px-2 text-gray-800">#</th>
+                  <th className="py-2 px-2 text-gray-800">Nickname</th>
+                  <th className="py-2 px-2 text-gray-800">Score</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedScores.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="text-center text-gray-500 py-4">No scores yet.</td>
+                    <td colSpan={3} className="text-center text-gray-800 py-4">No scores yet.</td>
                   </tr>
                 ) : (
                   sortedScores.map((entry, idx) => (

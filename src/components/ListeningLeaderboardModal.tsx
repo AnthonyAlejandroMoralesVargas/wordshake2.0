@@ -6,13 +6,15 @@ import { ListeningScore } from '../types';
 interface ListeningLeaderboardModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onBackToResults?: () => void; // Nueva prop opcional para regresar a resultados
 }
 
 const DIFFICULTIES = ["All", "Beginner", "Intermediate", "Advanced"];
 
 const ListeningLeaderboardModal: React.FC<ListeningLeaderboardModalProps> = ({
   isOpen,
-  onClose
+  onClose,
+  onBackToResults
 }) => {
   const { getListeningLeaderboard, loading } = useScoreService();
   const [difficultyFilter, setDifficultyFilter] = useState<string>('All');
@@ -92,8 +94,9 @@ const ListeningLeaderboardModal: React.FC<ListeningLeaderboardModalProps> = ({
               </div>
             </div>
             <button
-              onClick={onClose}
+              onClick={onBackToResults || onClose}
               className="text-white hover:text-green-100 transition-colors"
+              title={onBackToResults ? "Back to Results" : "Close"}
             >
               <X size={24} />
             </button>

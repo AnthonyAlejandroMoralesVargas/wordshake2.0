@@ -31,9 +31,9 @@ const GrammarHome: React.FC<GrammarHomeProps> = ({ onBack, onStartGame }) => {
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
             Grammar Practice
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-xl text-gray-800 max-w-2xl mx-auto">
             Improve your English pronunciation and speaking skills with interactive grammar exercises
-          </p>
+          </h2>
         </div>
 
         {/* Main Content */}
@@ -41,75 +41,102 @@ const GrammarHome: React.FC<GrammarHomeProps> = ({ onBack, onStartGame }) => {
           {/* Left Column - Game Info */}
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-md p-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
                 🎯 How It Works
-              </h2>
+              </h3>
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-semibold">1</span>
+                    <span className="text-blue-800 font-semibold">1</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">Listen & Learn</h3>
-                    <p className="text-gray-600">Hear native pronunciation of grammar structures</p>
+                    <p className="font-semibold text-black">Listen & Learn</p>
+                                        <p className="text-gray-800">Hear native pronunciation of grammar structures</p>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg p-6 shadow-lg">
+                  <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Mic size={32} className="text-blue-600" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">2. Record Yourself</h4>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-gray-800">Record yourself repeating the sentences</p>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg p-6 shadow-lg">
+                  <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle size={32} className="text-green-600" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">3. Get Feedback</h4>
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <p className="text-gray-800">Receive instant pronunciation feedback</p>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg p-6 shadow-lg">
+                  <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <TrendingUp size={32} className="text-purple-600" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">4. Track Progress</h4>
+                  <div className="bg-purple-50 p-3 rounded-lg">
+                    <p className="text-gray-800">Monitor your completion times and improvement</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-semibold">2</span>
+                    <span className="text-green-800 font-semibold">2</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">Practice Speaking</h3>
+                    <p className="font-semibold text-black">Practice Speaking</p>
                     <p className="text-gray-600">Record yourself repeating the sentences</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <span className="text-purple-600 font-semibold">3</span>
+                    <span className="text-purple-800 font-semibold">3</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">Get Feedback</h3>
-                    <p className="text-gray-600">Receive instant pronunciation feedback</p>
+                    <p className="font-semibold text-black">Get Feedback</p>
+                    <p className="text-gray-800">Receive instant pronunciation feedback</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                    <span className="text-yellow-600 font-semibold">4</span>
+                    <span className="text-yellow-800 font-semibold">4</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">Track Progress</h3>
-                    <p className="text-gray-600">Monitor your completion times and improvement</p>
+                    <p className="font-semibold text-black">Track Progress</p>
+                    <p className="text-gray-800">Monitor your completion times and improvement</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow-md p-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
                 📚 What You'll Practice
-              </h2>
+              </h3>
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <span className="text-green-500">🟢</span>
+                  <div className="flex-shrink-0 w-6 h-6 bg-green-600 rounded-full"></div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">Beginner</h3>
+                    <p className="font-semibold text-black">Beginner</p>
                     <p className="text-gray-600">Present Simple, Questions, Negatives</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className="text-yellow-500">🟡</span>
+                  <div className="flex-shrink-0 w-6 h-6 bg-yellow-600 rounded-full"></div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">Intermediate</h3>
+                    <p className="font-semibold text-black">Intermediate</p>
                     <p className="text-gray-600">Present Continuous, Past Simple, Future</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className="text-red-500">🔴</span>
+                  <div className="flex-shrink-0 w-6 h-6 bg-red-600 rounded-full"></div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">Advanced</h3>
+                    <p className="font-semibold text-black">Advanced</p>
                     <p className="text-gray-600">Present Perfect, Conditionals, Passive Voice</p>
                   </div>
                 </div>
@@ -120,9 +147,9 @@ const GrammarHome: React.FC<GrammarHomeProps> = ({ onBack, onStartGame }) => {
           {/* Right Column - Action Buttons */}
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-md p-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">
                 Start Practicing
-              </h2>
+              </h3>
               
               <div className="space-y-4">
                 <button
@@ -142,9 +169,9 @@ const GrammarHome: React.FC<GrammarHomeProps> = ({ onBack, onStartGame }) => {
             </div>
 
             <div className="bg-white rounded-lg shadow-md p-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
                 💡 Tips for Success
-              </h2>
+              </h3>
               <ul className="space-y-2 text-gray-700">
                 <li>• Find a quiet environment for recording</li>
                 <li>• Speak clearly and at a natural pace</li>
@@ -171,19 +198,19 @@ const GrammarHome: React.FC<GrammarHomeProps> = ({ onBack, onStartGame }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
             <div className="text-4xl mb-4">🎵</div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Text-to-Speech</h3>
+            <p className="text-xl font-semibold text-black mb-2">Text-to-Speech</p>
             <p className="text-gray-600">Hear native pronunciation of each sentence</p>
           </div>
           
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
             <div className="text-4xl mb-4">📊</div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Audio Visualization</h3>
+            <p className="text-xl font-semibold text-black mb-2">Audio Visualization</p>
             <p className="text-gray-600">See your voice patterns in real-time</p>
           </div>
           
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
             <div className="text-4xl mb-4">⚡</div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Instant Feedback</h3>
+            <p className="text-xl font-semibold text-black mb-2">Instant Feedback</p>
             <p className="text-gray-600">Get immediate pronunciation assessment</p>
           </div>
         </div>

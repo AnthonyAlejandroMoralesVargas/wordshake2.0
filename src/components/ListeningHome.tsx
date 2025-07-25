@@ -56,7 +56,7 @@ const ListeningHome: React.FC<ListeningHomeProps> = ({
           {/* Main Content */}
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-gray-800 mb-4">Listening Challenge</h1>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-gray-800 mb-8">
               Watch videos and fill in the missing words by listening carefully
             </p>
             
@@ -67,21 +67,21 @@ const ListeningHome: React.FC<ListeningHomeProps> = ({
                     <Volume2 size={32} className="text-green-600" />
                   </div>
                   <h3 className="font-semibold text-gray-800">Listen Carefully</h3>
-                  <p className="text-sm text-gray-600">Pay attention to pronunciation</p>
+                  <p className="text-sm text-gray-800">Pay attention to pronunciation</p>
                 </div>
                 <div className="text-center">
                   <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <BookOpen size={32} className="text-blue-600" />
                   </div>
                   <h3 className="font-semibold text-gray-800">Fill the Blanks</h3>
-                  <p className="text-sm text-gray-600">Complete the paragraph</p>
+                  <p className="text-sm text-gray-800">Complete the paragraph</p>
                 </div>
                 <div className="text-center">
                   <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Trophy size={32} className="text-purple-600" />
                   </div>
                   <h3 className="font-semibold text-gray-800">Earn Points</h3>
-                  <p className="text-sm text-gray-600">Score based on accuracy</p>
+                  <p className="text-sm text-gray-800">Score based on accuracy</p>
                 </div>
               </div>
 

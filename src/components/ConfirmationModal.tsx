@@ -30,12 +30,13 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             <button
               onClick={onCancel}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Close confirmation dialog"
             >
-              <X size={20} className="text-gray-600" />
+              <X size={20} className="text-gray-800" />
             </button>
           </div>
           
-          <p className="text-gray-600 mb-6">{message}</p>
+          <p className="text-gray-800 mb-6">{message}</p>
           
           <div className="flex gap-3">
             <button

@@ -1346,7 +1346,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
             <div className="flex justify-between items-center">
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">Grammar Practice</h1>
-                <p className="text-gray-600">{gameState.currentSession.title}</p>
+                <p className="text-gray-800">{gameState.currentSession.title}</p>
               </div>
               <div className="flex gap-2">
                 <button
@@ -1366,7 +1366,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
 
             {/* Progress */}
             <div className="mt-4">
-              <div className="flex justify-between text-sm text-gray-600 mb-2">
+              <div className="flex justify-between text-sm text-gray-800 mb-2">
                 <span>Sentence {gameState.currentSentenceIndex + 1} of {gameState.currentSession.sentences.length}</span>
                 <div className="flex gap-4">
                   <span>Time: {gameState.gameStarted ? currentTime : 0}s</span>

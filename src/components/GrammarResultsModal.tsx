@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 
 interface GrammarResultsModalProps {
   totalTime: number;
@@ -99,12 +100,29 @@ const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header con botón X */}
+        <div className="bg-gradient-to-r from-green-500 to-teal-600 p-6 text-white rounded-t-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">
+                Session Complete!
+              </h1>
+              <p className="text-green-100">Check your performance!</p>
+            </div>
+            <button
+              onClick={onBack}
+              className="text-white hover:text-green-100 transition-colors"
+              aria-label="Go to grammar home"
+              title="Back to Grammar Home"
+            >
+              <X size={24} />
+            </button>
+          </div>
+        </div>
+        
         <div className="p-8">
-          {/* Header */}
+          {/* Difficulty Badge */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">
-              Session Complete!
-            </h1>
             <div className={`inline-block px-4 py-2 rounded-full text-sm font-semibold ${getDifficultyColor()}`}>
               {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Level
             </div>
@@ -167,13 +185,13 @@ const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
                 <div className={`text-xl font-bold ${getPerformanceRating().color}`}>
                   {getPerformanceRating().rating}
                 </div>
-                <div className="text-sm text-gray-600 mt-1">Performance Rating</div>
+                <div className="text-sm text-gray-800 mt-1">Performance Rating</div>
               </div>
               <div className="bg-blue-50 rounded-lg p-4 text-center">
                 <div className="text-xl font-bold text-blue-600">
                   {getAverageTimePerSentence()}s
                 </div>
-                <div className="text-sm text-gray-600 mt-1">Avg. Time per Sentence</div>
+                <div className="text-sm text-gray-800 mt-1">Avg. Time per Sentence</div>
               </div>
             </div>
             
@@ -230,7 +248,7 @@ const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
                 className={`w-full mt-3 px-6 py-3 rounded-lg font-semibold transition-colors ${
                   playerName.trim()
                     ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-300 text-gray-800 cursor-not-allowed'
                 }`}
               >
                 Save Score
