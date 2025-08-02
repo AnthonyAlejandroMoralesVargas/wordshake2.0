@@ -56,29 +56,29 @@ const WordshakeHome: React.FC<WordshakeHomeProps> = ({
 
           {/* Main Content */}
           <main className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-gray-800 mb-4">Vocabulary Challenge</h1>
-            <p className="text-xl text-gray-600 mb-8">
+            <h1 className="text-5xl font-bold text-gray-800 mb-4" tabIndex={0}>Vocabulary Challenge</h1>
+            <p className="text-xl text-gray-600 mb-8" tabIndex={0}>
               Build words from letter grids based on different themes
             </p>
             
             <section className="bg-white rounded-2xl p-8 shadow-lg max-w-2xl mx-auto" aria-labelledby="game-overview">
               <h2 id="game-overview" className="sr-only">Game Features</h2>
               <div className="grid md:grid-cols-3 gap-6 mb-8">
-                <div className="text-center">
+                <div className="text-center" tabIndex={0}>
                   <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Book size={32} className="text-blue-600" aria-hidden="true" />
                   </div>
                   <h3 className="font-semibold text-gray-800">Build Words</h3>
                   <p className="text-sm text-gray-600">Create words from letters</p>
                 </div>
-                <div className="text-center">
+                <div className="text-center" tabIndex={0}>
                   <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Trophy size={32} className="text-purple-600" aria-hidden="true" />
                   </div>
                   <h3 className="font-semibold text-gray-800">Earn Stars</h3>
                   <p className="text-sm text-gray-600">Score based on word length</p>
                 </div>
-                <div className="text-center">
+                <div className="text-center" tabIndex={0}>
                   <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Play size={32} className="text-green-600" aria-hidden="true" />
                   </div>
@@ -87,9 +87,9 @@ const WordshakeHome: React.FC<WordshakeHomeProps> = ({
                 </div>
               </div>
 
-              <section className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white" aria-labelledby="how-to-play">
-                <h2 id="how-to-play" className="text-xl font-bold mb-2">How to Play</h2>
-                <ul className="text-left space-y-2 text-sm">
+              <section className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white" aria-labelledby="how-to-play" tabIndex={0}>
+                <h2 id="how-to-play" className="text-xl font-bold mb-2" tabIndex={0}>How to Play</h2>
+                <ul className="text-left space-y-2 text-sm" tabIndex={0}>
                   <li>• Choose your difficulty level (Basic, Intermediate, Advanced)</li>
                   <li>• Basic: 3-minute time limit, simple themes, unlimited shuffles</li>
                   <li>• Intermediate: 2.5-minute time limit, mixed themes, limited shuffles</li>

@@ -282,7 +282,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
       case 'advanced':
         return 'text-purple-600 bg-purple-100';
       default:
-        return 'text-gray-800 bg-gray-100';
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
@@ -387,7 +387,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
                       disabled={getMaxHints() > 0 && getRemainingHints() === 0 && !showHints[blank.id]}
                       className={`transition-colors ${
                         getMaxHints() > 0 && getRemainingHints() === 0 && !showHints[blank.id]
-                          ? 'text-gray-700 cursor-not-allowed'
+                          ? 'text-gray-400 cursor-not-allowed'
                           : 'text-blue-500 hover:text-blue-700'
                       }`}
                       title={
@@ -411,7 +411,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
                   )}
                 </div>
                 {showHint && getMaxHints() !== 0 && (
-                  <div className="absolute mt-1 text-sm text-gray-800 bg-yellow-100 p-2 rounded shadow-md z-10 min-w-48">
+                  <div className="absolute mt-1 text-sm text-gray-600 bg-yellow-100 p-2 rounded shadow-md z-10 min-w-48">
                     <strong>Hint:</strong> {blank.hint}
                   </div>
                 )}
@@ -520,7 +520,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
               </div>
               <div className="mt-4">
                 <h3 className="font-semibold text-gray-800">{currentVideo.title}</h3>
-                <p className="text-sm text-gray-800">
+                <p className="text-sm text-gray-600">
                   Difficulty: {currentVideo.difficulty} | Duration: {currentVideo.duration}
                 </p>
               </div>
@@ -536,7 +536,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
               </div>
               
               <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-800">
+                <div className="text-sm text-gray-600">
                   {Object.keys(userAnswers).length} of {currentExercise.blanks.length} blanks filled
                   {getRemainingHints() > 0 && selectedDifficulty !== 'advanced' && (
                     <span className="ml-2 text-orange-600">

@@ -185,13 +185,13 @@ const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
                 <div className={`text-xl font-bold ${getPerformanceRating().color}`}>
                   {getPerformanceRating().rating}
                 </div>
-                <div className="text-sm text-gray-800 mt-1">Performance Rating</div>
+                <div className="text-sm text-gray-600 mt-1">Performance Rating</div>
               </div>
               <div className="bg-blue-50 rounded-lg p-4 text-center">
                 <div className="text-xl font-bold text-blue-600">
                   {getAverageTimePerSentence()}s
                 </div>
-                <div className="text-sm text-gray-800 mt-1">Avg. Time per Sentence</div>
+                <div className="text-sm text-gray-600 mt-1">Avg. Time per Sentence</div>
               </div>
             </div>
             
@@ -248,7 +248,7 @@ const GrammarResultsModal: React.FC<GrammarResultsModalProps> = ({
                 className={`w-full mt-3 px-6 py-3 rounded-lg font-semibold transition-colors ${
                   playerName.trim()
                     ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-gray-300 text-gray-800 cursor-not-allowed'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
                 Save Score

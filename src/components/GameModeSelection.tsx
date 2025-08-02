@@ -64,7 +64,7 @@ const GameModeSelection: React.FC<GameModeSelectionProps> = ({
       <div className="absolute top-6 right-8 flex items-center gap-4">
         {isLoggedIn && user ? (
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg" aria-label={`Currently logged in as ${user.displayName}`}>
+            <div className="flex items-center gap-2 bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg" aria-label={`Currently logged in as ${user.displayName}`} tabIndex={0}>
               <User size={20} aria-hidden="true" />
               <span className="font-semibold">{user.displayName}</span>
             </div>
@@ -92,10 +92,10 @@ const GameModeSelection: React.FC<GameModeSelectionProps> = ({
       </div>
       
       <main className="text-center max-w-4xl mx-auto">
-        <h1 className="text-6xl font-bold text-white mb-6">
+        <h1 className="text-6xl font-bold text-white mb-6" tabIndex={0}>
           WordShake 2.0
         </h1>
-        <p className="text-xl text-white/80 mb-12 max-w-2xl mx-auto">
+        <p className="text-xl text-white/80 mb-12 max-w-2xl mx-auto" tabIndex={0}>
           Master English through interactive vocabulary, grammar, and listening challenges
         </p>
         
@@ -124,17 +124,17 @@ const GameModeSelection: React.FC<GameModeSelectionProps> = ({
         </section>
         
         <section className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 border border-white/20" tabIndex={0} role="region" aria-labelledby="instructions-heading">
-          <h2 id="instructions-heading" className="text-2xl font-bold text-white mb-4">How to Play</h2>
+          <h2 id="instructions-heading" className="text-2xl font-bold text-white mb-4" tabIndex={0}>How to Play</h2>
           <div className="grid md:grid-cols-3 gap-6 text-white/80">
-            <div>
+            <div tabIndex={0}>
               <h3 className="font-semibold text-white mb-2">1. Choose Your Game</h3>
               <p>Select from Vocabulary, Grammar, or Listening challenges</p>
             </div>
-            <div>
+            <div tabIndex={0}>
               <h3 className="font-semibold text-white mb-2">2. Pick Difficulty</h3>
               <p>Start with Basic, advance to Intermediate, master Advanced</p>
             </div>
-            <div>
+            <div tabIndex={0}>
               <h3 className="font-semibold text-white mb-2">3. Track Progress</h3>
               <p>View leaderboards and monitor your improvement</p>
             </div>

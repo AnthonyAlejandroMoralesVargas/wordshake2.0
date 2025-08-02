@@ -151,7 +151,7 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
         <div className="bg-gray-50 px-6 py-4 border-b">
           <div className="flex flex-wrap gap-4 items-center">
             <div className="flex items-center gap-2">
-              <Filter size={20} className="text-gray-800" />
+              <Filter size={20} className="text-gray-600" />
               <span className="text-sm font-medium text-gray-700">Filters:</span>
             </div>
             <select
@@ -163,7 +163,7 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>
-            <div className="text-sm text-gray-800">
+            <div className="text-sm text-gray-600">
               {sortedScores.length} scores
             </div>
           </div>
@@ -175,9 +175,9 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
             <div className="p-8 text-center">Loading...</div>
           ) : sortedScores.length === 0 ? (
             <div className="p-8 text-center">
-              <Trophy size={48} className="mx-auto text-gray-700 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">No scores found</h3>
-              <p className="text-gray-700">Try adjusting your filters or play a game to see scores here!</p>
+              <Trophy size={48} className="mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-600 mb-2">No scores found</h3>
+              <p className="text-gray-500">Try adjusting your filters or play a game to see scores here!</p>
             </div>
           ) : (
             <div className="p-6">
@@ -249,7 +249,7 @@ const VocabularyLeaderboardModal: React.FC<VocabularyLeaderboardModalProps> = ({
                               {index + 1}
                             </div>
                           ) : (
-                            <span className="text-gray-700 font-medium">{index + 1}</span>
+                            <span className="text-gray-500 font-medium">{index + 1}</span>
                           )}
                         </div>
                       </td>

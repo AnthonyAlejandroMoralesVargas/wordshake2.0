@@ -36,7 +36,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </button>
           </div>
           
-          <p className="text-gray-800 mb-6">{message}</p>
+                      <p className="text-gray-600 mb-6">{message}</p>
           
           <div className="flex gap-3">
             <button

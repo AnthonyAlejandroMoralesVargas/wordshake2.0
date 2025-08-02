@@ -106,7 +106,7 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
 
   const getScoreIcon = () => {
     if (score >= 90) return <Trophy size={32} className="text-yellow-500" />;
-    if (score >= 80) return <Medal size={32} className="text-gray-700" />;
+    if (score >= 80) return <Medal size={32} className="text-gray-400" />;
     if (score >= 70) return <Award size={32} className="text-amber-600" />;
     return <Star size={32} className="text-orange-500" />;
   };
@@ -120,7 +120,7 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
       case 'advanced':
         return 'text-purple-600 bg-purple-100';
       default:
-        return 'text-gray-800 bg-gray-100';
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
@@ -166,19 +166,19 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
             <div>
-              <span className="text-gray-800">Your answer:</span>
+              <span className="text-gray-600">Your answer:</span>
               <p className={`font-medium ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
                 {userAnswer || '(empty)'}
               </p>
             </div>
             
             <div>
-              <span className="text-gray-800">Correct answer:</span>
+              <span className="text-gray-600">Correct answer:</span>
               <p className="font-medium text-green-700">{blank.word}</p>
             </div>
             
             <div>
-              <span className="text-gray-800">Hint:</span>
+              <span className="text-gray-600">Hint:</span>
               <p className="text-gray-700">{blank.hint}</p>
             </div>
           </div>
@@ -242,10 +242,10 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
                 <div className={`text-6xl font-bold ${getScoreColor()}`}>
                   {score}
                 </div>
-                <span className="text-2xl text-gray-700">/100</span>
+                <span className="text-2xl text-gray-500">/100</span>
               </div>
               <p className="text-lg text-gray-700 mb-2">{getScoreMessage()}</p>
-              <div className="text-sm text-gray-800">
+              <div className="text-sm text-gray-600">
                 Accuracy: {accuracy}% ({correctAnswers}/{totalBlanks} correct)
               </div>
               <div className="mt-2">
@@ -256,7 +256,7 @@ const ListeningResultsModal: React.FC<ListeningResultsModalProps> = ({
               </div>
               
               {/* Difficulty Restrictions Info */}
-              <div className="mt-3 text-xs text-gray-700">
+              <div className="mt-3 text-xs text-gray-500">
                 {difficulty === 'beginner' && (
                   <span>✓ No time limit • Unlimited video playback • Hints and skip available</span>
                 )}

@@ -76,7 +76,7 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
       case 'beginner': return 'text-green-600';
       case 'intermediate': return 'text-blue-600';
       case 'advanced': return 'text-red-600';
-      default: return 'text-gray-800';
+      default: return 'text-gray-600';
     }
   };
 
@@ -160,7 +160,7 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
           {/* Score Summary */}
           <div className="text-center mb-6">
             <div className="text-4xl font-bold text-gray-800 mb-2">{score}</div>
-            <div className="text-lg text-gray-800 mb-4">Total Points</div>
+            <div className="text-lg text-gray-600 mb-4">Total Points</div>
             <p className="text-lg font-semibold text-blue-600">{getScoreMessage(score)}</p>
           </div>
 
@@ -200,27 +200,27 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
                 <Star size={20} className="text-yellow-800" />
                 <span className="text-2xl font-bold text-yellow-800">{stars}</span>
               </div>
-              <div className="text-gray-800">Stars Earned</div>
+              <div className="text-gray-600">Stars Earned</div>
             </div>
             <div className="bg-blue-50 rounded-lg p-4 text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Book size={20} className="text-blue-600" />
                 <span className="text-2xl font-bold text-blue-600">{wordsFound.length}</span>
               </div>
-              <div className="text-gray-800">Words Found</div>
+              <div className="text-gray-600">Words Found</div>
             </div>
             <div className="bg-green-50 rounded-lg p-4 text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Clock size={20} className="text-green-600" />
                 <span className="text-2xl font-bold text-green-600">{formatTime(timeSpent)}</span>
               </div>
-              <div className="text-gray-800">Time Spent</div>
+              <div className="text-gray-600">Time Spent</div>
             </div>
             <div className="bg-purple-50 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold text-purple-600 mb-2">
                 {Math.round((wordsFound.length / totalWords) * 100)}%
               </div>
-              <div className="text-gray-800">Completion</div>
+              <div className="text-gray-600">Completion</div>
             </div>
           </div>
 
@@ -229,21 +229,21 @@ const VocabularyResultsModal: React.FC<VocabularyResultsModalProps> = ({
             <h3 className="font-semibold text-gray-800 mb-3">Game Details</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-800">Theme:</span>
+                <span className="text-gray-600">Theme:</span>
                 <span className="font-medium text-gray-800">{theme}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-800">Difficulty:</span>
+                <span className="text-gray-600">Difficulty:</span>
                 <span className={`font-medium px-2 py-1 rounded-full text-xs ${getDifficultyBadge(difficulty)}`}>
                   {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-800">Total Possible Words:</span>
+                <span className="text-gray-600">Total Possible Words:</span>
                 <span className="font-medium text-gray-800">{totalWords}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-800">Player:</span>
+                <span className="text-gray-600">Player:</span>
                 <span className="font-medium text-gray-800">
                   {isLoggedIn && user ? user.displayName : 'Anonymous Player'}
                 </span>

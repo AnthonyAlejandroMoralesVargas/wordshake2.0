@@ -56,7 +56,7 @@ const ListeningHome: React.FC<ListeningHomeProps> = ({
           {/* Main Content */}
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-gray-800 mb-4">Listening Challenge</h1>
-            <p className="text-xl text-gray-800 mb-8">
+            <p className="text-xl text-gray-600 mb-8">
               Watch videos and fill in the missing words by listening carefully
             </p>
             

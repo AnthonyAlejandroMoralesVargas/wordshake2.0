@@ -35,7 +35,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
             title="Home"
             aria-label="Go to home"
           >
-            <Home size={24} className="text-gray-800" />
+            <Home size={24} className="text-gray-600" />
           </button>
           <button
             onClick={onRestart}
@@ -43,7 +43,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
             title="Restart Game"
             aria-label="Restart game"
           >
-            <RotateCcw size={24} className="text-gray-800" />
+            <RotateCcw size={24} className="text-gray-600" />
           </button>
           <button
             onClick={onInstructions}
@@ -51,7 +51,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
             title="Instructions"
             aria-label="Show instructions"
           >
-            <BookOpen size={24} className="text-gray-800" />
+            <BookOpen size={24} className="text-gray-600" />
           </button>
           <button
             onClick={onToggleMute}
@@ -59,7 +59,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
             title={isMuted ? "Unmute" : "Mute"}
             aria-label={isMuted ? "Unmute sound" : "Mute sound"}
           >
-            {isMuted ? <VolumeX size={24} className="text-gray-800" /> : <Volume2 size={24} className="text-gray-800" />}
+            {isMuted ? <VolumeX size={24} className="text-gray-600" /> : <Volume2 size={24} className="text-gray-600" />}
           </button>
         </nav>
       </div>
