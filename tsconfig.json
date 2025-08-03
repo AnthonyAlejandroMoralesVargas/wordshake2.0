@@ -1,41 +1,39 @@
 {
   "compilerOptions": {
     /* Language and Environment */
-    "target": "ESNext",                          /* Establece la versión de JavaScript de salida a ESNext (la más reciente). */
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],    /* Incluye las bibliotecas necesarias para aplicaciones de navegador y funcionalidades modernas de JS. */
-    "jsx": "react-jsx",                          /* Especifica que se está usando JSX con la transformación automática de React 17+. */
-    "useDefineForClassFields": true,             /* Emite campos de clase compatibles con el estándar ECMAScript. */
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "jsx": "react-jsx",
+    "useDefineForClassFields": true,
 
     /* Modules */
-    "module": "ESNext",                          /* Especifica que el código del módulo se genera como módulos ES (preferido por Vite). */
-    "moduleResolution": "bundler",               /* Cómo TypeScript busca un archivo desde un especificador de módulo. 'bundler' es moderno. */
-    "resolveJsonModule": true,                   /* Permite importar archivos .json directamente. */
-    "isolatedModules": true,                     /* Asegura que cada archivo pueda ser transpuesto de forma segura sin depender de otras importaciones. */
-    // "baseUrl": "./",                         /* La base para resolver nombres de módulos no relativos. Puede ser útil con "paths". */
-    // "paths": {},                             /* Mapea importaciones a ubicaciones de búsqueda adicionales (útil para alias como @/). */
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
 
     /* Emit */
-    "noEmit": true,                              /* **CRUCIAL PARA VITE:** Deshabilita la emisión de archivos por parte de TypeScript; Vite se encarga de esto. */
-    // "declaration": true,                     /* Generar archivos .d.ts. Útil para librerías, no siempre para apps. */
-    // "sourceMap": true,                       /* Genera archivos de mapa de origen. Vite también puede generarlos. */
-    // "outDir": "./dist",                      /* Directorio de salida. Con "noEmit: true", Vite lo gestiona. */
+    "noEmit": true,
 
     /* Interop Constraints */
-    "esModuleInterop": true,                     /* Emite JavaScript adicional para facilitar la importación de módulos CommonJS. */
-    "forceConsistentCasingInFileNames": true,    /* Asegura que la capitalización sea correcta en las importaciones. */
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
 
     /* Type Checking */
-    "strict": true,                              /* Habilita todas las opciones de comprobación de tipo estricta. */
-    // Puedes descomentar otras opciones 'strict' aquí si deseas más rigurosidad.
-    // "noImplicitAny": true,
-    // "strictNullChecks": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    // "noFallthroughCasesInSwitch": true,
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
 
     /* Completeness */
-    "skipLibCheck": true                         /* Omite la comprobación de tipos para todos los archivos .d.ts de las bibliotecas. */
+    "skipLibCheck": true,
+    "types": ["vite/client", "node"]
   },
-  "include": ["src"],                              /* Incluye todos los archivos TypeScript y JSX dentro de la carpeta 'src'. */
-  "exclude": ["node_modules"]                      /* Excluye el directorio node_modules de la compilación. */
+  "include": ["src", "vite-env.d.ts"],
+  "exclude": ["node_modules", "dist"]
 }
