@@ -579,7 +579,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
         {/* Confirmation Modals */}
         <ConfirmationModal
           isOpen={showHomeConfirmation}
-          onClose={() => setShowHomeConfirmation(false)}
+          onCancel={() => setShowHomeConfirmation(false)}
           onConfirm={handleConfirmHome}
           title="Leave Game?"
           message="Are you sure you want to leave? Your progress will be lost."
@@ -587,7 +587,7 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onHome, selectedDifficult
 
         <ConfirmationModal
           isOpen={showRestartConfirmation}
-          onClose={() => setShowRestartConfirmation(false)}
+          onCancel={() => setShowRestartConfirmation(false)}
           onConfirm={handleConfirmRestart}
           title="Restart Game?"
           message="Are you sure you want to restart? Your current progress will be lost."
