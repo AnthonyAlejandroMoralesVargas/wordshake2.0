@@ -346,7 +346,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     if (gameState.gameStarted && !gameState.gameEnded) {
       interval = setInterval(() => {
         setCurrentTime(Math.floor((Date.now() - gameState.startTime) / 1000));
-      }, 1000);
+      }, 1000) as unknown as number;
     }
 
     return () => {
@@ -614,7 +614,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
         }
         return prev - 1;
       });
-    }, 1000);
+    }, 1000) as unknown as number;
     setCountdownTimer(timer);
   };
 
@@ -644,7 +644,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
     setRecordingDuration(0);
     const timer = setInterval(() => {
       setRecordingDuration(prev => prev + 1);
-    }, 1000);
+    }, 1000) as unknown as number;
     setRecordingDurationTimer(timer);
   };
 
@@ -679,7 +679,7 @@ const GrammarGame: React.FC<GrammarGameProps> = ({ difficulty, onBack }) => {
         // Wait before retry
         const retryTimeout = setTimeout(() => {
           startSpeechRecognitionWithRetry();
-        }, retryDelay);
+        }, retryDelay) as unknown as number;
         setRecognitionRetryTimer(retryTimeout);
       } else {
         console.log('Max retries reached, continuing without speech recognition');
