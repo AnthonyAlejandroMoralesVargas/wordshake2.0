@@ -257,7 +257,7 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
     errorTimeoutRef.current = setTimeout(() => {
       setShowError(false);
       errorTimeoutRef.current = null;
-    }, 1000);
+    }, 1000) as unknown as number;
   };
 
   // Function to find available words that haven't been found yet
@@ -353,8 +353,8 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
               return prev + 1;
             }
           });
-        }, 800); // 800ms between each letter
-        
+        }, 800) as unknown as number;
+
         setHintAnimationInterval(interval);
         
         // Clean up hint state after animation completes

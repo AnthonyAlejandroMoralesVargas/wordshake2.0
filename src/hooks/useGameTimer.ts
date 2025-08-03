@@ -41,7 +41,7 @@ export const useGameTimer = (initialTime: number = 180) => {
           }
           return prev - 1;
         });
-      }, 1000);
+      }, 1000) as unknown as number;
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
