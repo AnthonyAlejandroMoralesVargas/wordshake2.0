@@ -11,7 +11,7 @@ interface CustomYouTubePlayerProps {
   currentPlayCount?: number;
   onPlayCountChange?: (count: number) => void;
   disabled?: boolean;
-  seekTo?: (time: number) => void;
+  seekTo?: (seekFunction: (time: number) => void) => void; // Corregido: función que recibe una función
   allowProgressControl?: boolean;
 }
 
@@ -165,7 +165,7 @@ const CustomYouTubePlayer: React.FC<CustomYouTubePlayerProps> = ({
 
   // Update time using a simpler, more reliable approach
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    let intervalId: number; // Corregido: usar number en lugar de NodeJS.Timeout
 
     const updateTime = () => {
       if (playerInstanceRef.current && isReady) {
@@ -184,7 +184,7 @@ const CustomYouTubePlayer: React.FC<CustomYouTubePlayerProps> = ({
 
     if (isReady) {
       // Update every 16ms (60fps) for maximum smoothness
-      intervalId = setInterval(updateTime, 16);
+      intervalId = window.setInterval(updateTime, 16); // Usar window.setInterval
       
       // Initial update
       updateTime();
@@ -192,7 +192,7 @@ const CustomYouTubePlayer: React.FC<CustomYouTubePlayerProps> = ({
 
     return () => {
       if (intervalId) {
-        clearInterval(intervalId);
+        window.clearInterval(intervalId); // Usar window.clearInterval
       }
     };
   }, [isReady, isPlaying, onTimeUpdate]);
@@ -293,7 +293,7 @@ const CustomYouTubePlayer: React.FC<CustomYouTubePlayerProps> = ({
   // Expose seekTo function to parent
   useEffect(() => {
     if (seekTo) {
-      seekTo(handleSeekTo);
+      seekTo(handleSeekTo); // Corregido: pasar la función, no llamarla
     }
   }, [seekTo, isReady]);
 
@@ -518,58 +518,61 @@ const CustomYouTubePlayer: React.FC<CustomYouTubePlayerProps> = ({
         </div>
       )}
 
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          height: 16px;
-          width: 16px;
-          border-radius: 50%;
-          background: #ef4444;
-          cursor: pointer;
-        }
-        
-        .slider::-moz-range-thumb {
-          height: 16px;
-          width: 16px;
-          border-radius: 50%;
-          background: #ef4444;
-          cursor: pointer;
-          border: none;
-        }
+      {/* Corregido: Usar un componente style normal en lugar de style jsx */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .slider::-webkit-slider-thumb {
+            appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #ef4444;
+            cursor: pointer;
+          }
+          
+          .slider::-moz-range-thumb {
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #ef4444;
+            cursor: pointer;
+            border: none;
+          }
 
-        /* Completely disable all YouTube interactions */
-        iframe {
-          pointer-events: none !important;
-        }
+          /* Completely disable all YouTube interactions */
+          iframe {
+            pointer-events: none !important;
+          }
 
-        /* Hide all YouTube links, buttons, and interactive elements */
-        iframe[src*="youtube"] * {
-          pointer-events: none !important;
-        }
+          /* Hide all YouTube links, buttons, and interactive elements */
+          iframe[src*="youtube"] * {
+            pointer-events: none !important;
+          }
 
-        /* Hide YouTube logo and any clickable elements */
-        iframe[src*="youtube"] a,
-        iframe[src*="youtube"] button,
-        iframe[src*="youtube"] [role="button"],
-        iframe[src*="youtube"] .ytp-button,
-        iframe[src*="youtube"] .ytp-title,
-        iframe[src*="youtube"] .ytp-show-cards-title,
-        iframe[src*="youtube"] .ytp-watermark {
-          display: none !important;
-          pointer-events: none !important;
-          visibility: hidden !important;
-        }
+          /* Hide YouTube logo and any clickable elements */
+          iframe[src*="youtube"] a,
+          iframe[src*="youtube"] button,
+          iframe[src*="youtube"] [role="button"],
+          iframe[src*="youtube"] .ytp-button,
+          iframe[src*="youtube"] .ytp-title,
+          iframe[src*="youtube"] .ytp-show-cards-title,
+          iframe[src*="youtube"] .ytp-watermark {
+            display: none !important;
+            pointer-events: none !important;
+            visibility: hidden !important;
+          }
 
-        /* Prevent any hover effects on YouTube elements */
-        iframe[src*="youtube"] *:hover {
-          pointer-events: none !important;
-        }
+          /* Prevent any hover effects on YouTube elements */
+          iframe[src*="youtube"] *:hover {
+            pointer-events: none !important;
+          }
 
-        /* Ensure our controls are always clickable */
-        .z-20 * {
-          pointer-events: auto !important;
-        }
-      `}</style>
+          /* Ensure our controls are always clickable */
+          .z-20 * {
+            pointer-events: auto !important;
+          }
+        `
+      }} />
     </div>
   );
 };
@@ -582,4 +585,4 @@ declare global {
   }
 }
 
-export default CustomYouTubePlayer; 
+export default CustomYouTubePlayer;
