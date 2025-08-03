@@ -36,12 +36,12 @@ const WordshakeGame: React.FC<WordshakeGameProps> = ({ difficulty, onHome }) => 
   const [gameEndTime, setGameEndTime] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showError, setShowError] = useState<boolean>(false);
-  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const errorTimeoutRef = useRef<number | null>(null);
   const [hintIndices, setHintIndices] = useState<number[]>([]);
   const [hintsUsed, setHintsUsed] = useState<number>(0);
   const [showHint, setShowHint] = useState<boolean>(false);
   const [currentHintIndex, setCurrentHintIndex] = useState<number>(0);
-  const [hintAnimationInterval, setHintAnimationInterval] = useState<NodeJS.Timeout | null>(null);
+  const [hintAnimationInterval, setHintAnimationInterval] = useState<number | null>(null);
 
   // Get time limit based on difficulty
   const timeLimit = getTimeLimitForDifficulty(difficulty);

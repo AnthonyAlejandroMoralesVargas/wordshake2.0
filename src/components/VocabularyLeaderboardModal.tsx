@@ -6,6 +6,7 @@ import { VocabularyScore } from '../types';
 interface VocabularyLeaderboardModalProps {
   isOpen: boolean;
   onClose: () => void;
+  difficulty?: string;
 }
 
 const DIFFICULTIES = ["All", "Beginner", "Intermediate", "Advanced"];
