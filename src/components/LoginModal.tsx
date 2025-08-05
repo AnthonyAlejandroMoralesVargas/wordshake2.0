@@ -1,5 +1,5 @@
 import { Eye, EyeOff, LogIn, X } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LoginModalProps {
@@ -10,11 +10,66 @@ interface LoginModalProps {
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch }) => {
   const { login } = useAuth();
+  
+  // Hooks SIEMPRE van al inicio, antes de cualquier return
+  const modalRef = useRef<HTMLDivElement>(null);
+  const firstFocusableRef = useRef<HTMLHeadingElement>(null);
+  const lastFocusableRef = useRef<HTMLButtonElement>(null);
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Focus trap effect
+  useEffect(() => {
+    if (isOpen) {
+      // Focus the first element when modal opens
+      setTimeout(() => {
+        firstFocusableRef.current?.focus();
+      }, 100);
+
+      // Handle Tab key to trap focus
+      const handleTabKey = (e: KeyboardEvent) => {
+        if (e.key === 'Tab') {
+          const focusableElements = modalRef.current?.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          
+          if (focusableElements && focusableElements.length > 0) {
+            const firstElement = focusableElements[0] as HTMLElement;
+            const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+            
+            if (e.shiftKey) {
+              if (document.activeElement === firstElement) {
+                lastElement.focus();
+                e.preventDefault();
+              }
+            } else {
+              if (document.activeElement === lastElement) {
+                firstElement.focus();
+                e.preventDefault();
+              }
+            }
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleTabKey);
+      return () => {
+        document.removeEventListener('keydown', handleTabKey);
+      };
+    }
+  }, [isOpen]);
+
+  // Handle keyboard navigation
+  const handleKeyDown = (event: React.KeyboardEvent, action: () => void) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -55,14 +110,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitch }) =>
   };
 
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="login-title"
-      aria-describedby="login-description"
-    >
-      <div className="bg-white rounded-2xl max-w-md w-full">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div 
+        ref={modalRef}
+        className="bg-white rounded-2xl max-w-md w-full"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-title"
+        aria-describedby="login-description"
+      >
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">

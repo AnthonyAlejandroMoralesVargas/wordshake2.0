@@ -1,5 +1,5 @@
 import { Book, Clock, Home, RotateCcw, Star, Trophy, User, X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useScoreService } from '../hooks/useScoreService';
 

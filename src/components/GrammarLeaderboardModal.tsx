@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useScoreService } from '../hooks/useScoreService';
 import { GrammarScore } from '../types';
 
@@ -11,9 +11,64 @@ const DIFFICULTIES = ["All", "Beginner", "Intermediate", "Advanced"];
 
 const GrammarLeaderboardModal: React.FC<GrammarLeaderboardModalProps> = ({ isOpen, onClose }) => {
   const { getGrammarLeaderboard, loading } = useScoreService();
+  
+  // Hooks SIEMPRE van al inicio, antes de cualquier return
+  const modalRef = useRef<HTMLDivElement>(null);
+  const firstFocusableRef = useRef<HTMLHeadingElement>(null);
+  const lastFocusableRef = useRef<HTMLButtonElement>(null);
+  
   const [scores, setScores] = useState<GrammarScore[]>([]);
   const [filterDifficulty, setFilterDifficulty] = useState<string>('All');
   const [sortBy, setSortBy] = useState<'time' | 'date'>('time');
+
+  // Focus trap effect
+  useEffect(() => {
+    if (isOpen) {
+      // Focus the first element when modal opens
+      setTimeout(() => {
+        firstFocusableRef.current?.focus();
+      }, 100);
+
+      // Handle Tab key to trap focus
+      const handleTabKey = (e: KeyboardEvent) => {
+        if (e.key === 'Tab') {
+          const focusableElements = modalRef.current?.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          
+          if (focusableElements && focusableElements.length > 0) {
+            const firstElement = focusableElements[0] as HTMLElement;
+            const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+            
+            if (e.shiftKey) {
+              if (document.activeElement === firstElement) {
+                lastElement.focus();
+                e.preventDefault();
+              }
+            } else {
+              if (document.activeElement === lastElement) {
+                firstElement.focus();
+                e.preventDefault();
+              }
+            }
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleTabKey);
+      return () => {
+        document.removeEventListener('keydown', handleTabKey);
+      };
+    }
+  }, [isOpen]);
+
+  // Handle keyboard navigation
+  const handleKeyDown = (event: React.KeyboardEvent, action: () => void) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
+    }
+  };
 
   const loadScores = useCallback(async () => {
     if (!isOpen) return;
